@@ -80,8 +80,6 @@ jobs:
     needs: validate
     if: github.ref == 'refs/heads/develop' || github.event.inputs.environment == 'staging'
     environment: staging
-    permissions:
-      contents: write
 
     steps:
       - name: Checkout code
@@ -109,25 +107,13 @@ jobs:
         if: github.event.inputs.action == 'seed' || github.event.inputs.action == 'reset'
         run: supabase db seed --password ${{ secrets.STAGING_DB_PASSWORD }}
 
-      - name: Generate TypeScript types
-        run: supabase gen types typescript --project-id ${{ secrets.STAGING_PROJECT_ID }} > packages/ui/src/lib/supabase/types.ts
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
-      - name: Install dependencies
-        run: bun install --frozen-lockfile
-
-      - name: Format generated types
-        run: bunx prettier --write packages/ui/src/lib/supabase/types.ts
-
-      - name: Commit generated types
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "chore: update supabase types [skip ci]"
-          file_pattern: "packages/ui/src/lib/supabase/types.ts"
+      - name: Deployment summary
+        run: |
+          echo "### ✅ Staging Deployment Successful" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- Migrations deployed to staging" >> $GITHUB_STEP_SUMMARY
+          echo "- Database: ${{ secrets.STAGING_PROJECT_ID }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Branch: \${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
 
   deploy-production:
     name: Deploy to production
@@ -136,8 +122,6 @@ jobs:
     needs: validate
     if: github.ref == 'refs/heads/main' || github.event.inputs.environment == 'production'
     environment: production
-    permissions:
-      contents: write
 
     steps:
       - name: Checkout code
@@ -169,25 +153,15 @@ jobs:
           echo "Please use staging environment for destructive operations"
           exit 1
 
-      - name: Generate TypeScript types
-        run: supabase gen types typescript --project-id ${{ secrets.PRODUCTION_PROJECT_ID }} > packages/ui/src/lib/supabase/types.ts
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-
-      - name: Install dependencies
-        run: bun install --frozen-lockfile
-
-      - name: Format generated types
-        run: bunx prettier --write packages/ui/src/lib/supabase/types.ts
-
-      - name: Commit generated types
-        uses: stefanzweifel/git-auto-commit-action@v5
-        with:
-          commit_message: "chore: update production supabase types [skip ci]"
-          file_pattern: "packages/ui/src/lib/supabase/types.ts"
+      - name: Deployment summary
+        run: |
+          echo "### ✅ Production Deployment Successful" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- Migrations deployed to production" >> $GITHUB_STEP_SUMMARY
+          echo "- Database: ${{ secrets.PRODUCTION_PROJECT_ID }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Branch: \${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Note:** TypeScript types should have been updated in the PR that introduced these migrations." >> $GITHUB_STEP_SUMMARY
 
   backup:
     name: Backup production

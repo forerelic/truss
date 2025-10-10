@@ -30,6 +30,7 @@
     "db:diff": "bunx supabase db diff",
     "db:validate": "bun run scripts/db-validate-migrations.ts",
     "db:migration:new": "bunx supabase migration new",
+    "db:migration:create": "./scripts/db-migration-helper.sh",
     "db:migration:list": "bunx supabase migration list",
     "db:pull": "bun run scripts/db-pull-schema.ts",
     "============ BETTER AUTH ============": "",
@@ -39,6 +40,7 @@
     "db:generate": "bun run scripts/db-generate-types.ts",
     "db:generate:local": "bun run scripts/db-generate-types.ts --local",
     "db:generate:remote": "bun run scripts/db-generate-types.ts --remote",
+    "db:types:check": "bun run scripts/db-check-type-drift.ts",
     "============ ENVIRONMENT ============": "",
     "env:validate": "bun run scripts/validate-environment.ts",
     "env:validate:staging": "bun run scripts/validate-environment.ts --env staging",
@@ -97,7 +99,7 @@
     "*.{ts,tsx,js,jsx}": [
       "prettier --write"
     ],
-    "*.{json,md,yml,yaml}": [
+    "*.{json,md}": [
       "prettier --write"
     ]
   }
