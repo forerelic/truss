@@ -210,9 +210,7 @@ async function createRelease() {
       console.log("4. Watch for issues/feedback");
     } catch (error: any) {
       console.error("❌ Failed to create release:", error.message);
-      console.error(
-        "\nMake sure you have GitHub CLI installed and authenticated:",
-      );
+      console.error("\nMake sure you have GitHub CLI installed and authenticated:");
       console.error("   brew install gh");
       console.error("   gh auth login");
       process.exit(1);

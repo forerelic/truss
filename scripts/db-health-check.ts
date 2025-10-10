@@ -91,10 +91,7 @@ try {
 
 // 4. Check environment variables
 console.log("4️⃣  Checking environment variables...");
-const requiredEnvVars = [
-  "NEXT_PUBLIC_SUPABASE_URL",
-  "NEXT_PUBLIC_SUPABASE_ANON_KEY",
-];
+const requiredEnvVars = ["NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_ANON_KEY"];
 let envIssues = false;
 
 for (const envVar of requiredEnvVars) {

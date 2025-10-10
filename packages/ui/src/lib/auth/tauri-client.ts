@@ -65,9 +65,7 @@ const getBaseUrl = () => {
   }
 
   // Production fallback - should be set via environment variable
-  console.warn(
-    "[TauriAuthClient] VITE_BETTER_AUTH_URL not set, using production URL",
-  );
+  console.warn("[TauriAuthClient] VITE_BETTER_AUTH_URL not set, using production URL");
   return "https://your-app.vercel.app"; // Will be replaced with actual URL
 };
 
@@ -99,11 +97,5 @@ export const tauriAuthClient = createAuthClient({
 });
 
 // Export commonly used hooks for convenience
-export const {
-  useSession,
-  signIn,
-  signOut,
-  signUp,
-  useActiveOrganization,
-  useListOrganizations,
-} = tauriAuthClient;
+export const { useSession, signIn, signOut, signUp, useActiveOrganization, useListOrganizations } =
+  tauriAuthClient;

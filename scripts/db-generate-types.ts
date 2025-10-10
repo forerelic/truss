@@ -99,12 +99,8 @@ try {
   console.error("\n❌ Error generating types:");
   console.error(error);
   console.error("\nTroubleshooting:");
-  console.error(
-    "1. For local: Ensure Docker is running and `bunx supabase start` completed",
-  );
-  console.error(
-    "2. For remote: Check that SUPABASE_DB_URL is correct in .env.local",
-  );
+  console.error("1. For local: Ensure Docker is running and `bunx supabase start` completed");
+  console.error("2. For remote: Check that SUPABASE_DB_URL is correct in .env.local");
   console.error("3. Verify database connection and permissions");
   process.exit(1);
 }

@@ -145,8 +145,7 @@ try {
       breaking.push(commit);
     }
 
-    const category =
-      COMMIT_TYPES[commit.type as keyof typeof COMMIT_TYPES] || "Other Changes";
+    const category = COMMIT_TYPES[commit.type as keyof typeof COMMIT_TYPES] || "Other Changes";
     if (!grouped[category]) {
       grouped[category] = [];
     }

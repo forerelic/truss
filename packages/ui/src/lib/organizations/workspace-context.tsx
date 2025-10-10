@@ -1,23 +1,9 @@
 "use client";
 
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useCallback,
-} from "react";
-import {
-  useSession,
-  useActiveOrganization,
-  useListOrganizations,
-} from "../auth/client";
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { useSession, useActiveOrganization, useListOrganizations } from "../auth/client";
 import { getMemberAppPermissions } from "./permissions";
-import type {
-  WorkspaceContext,
-  AppPermissionLevel,
-  OrganizationRole,
-} from "./types";
+import type { WorkspaceContext, AppPermissionLevel, OrganizationRole } from "./types";
 
 // Better Auth organization types (until proper types are exported)
 interface BetterAuthMember {
@@ -56,9 +42,7 @@ interface WorkspaceContextValue {
   refresh: () => Promise<void>;
 }
 
-const WorkspaceContextContext = createContext<
-  WorkspaceContextValue | undefined
->(undefined);
+const WorkspaceContextContext = createContext<WorkspaceContextValue | undefined>(undefined);
 
 /**
  * Workspace Provider
@@ -114,9 +98,7 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
       // Organization workspace
       // Get member info to retrieve permissions
       const betterAuthOrg = activeOrg as unknown as BetterAuthOrganization;
-      const member = betterAuthOrg.members?.find(
-        (m) => m.userId === session.user.id,
-      );
+      const member = betterAuthOrg.members?.find((m) => m.userId === session.user.id);
 
       if (!member) {
         throw new Error("User is not a member of the active organization");
@@ -194,21 +176,17 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
     isLoading: isLoading || sessionLoading,
     switchToPersonal,
     switchToOrganization,
-    organizations: (organizationsList || []).map(
-      (org: BetterAuthOrganization) => ({
-        id: org.id,
-        name: org.name,
-        slug: org.slug,
-        role: "member", // This would come from the members join - for now default to member
-      }),
-    ),
+    organizations: (organizationsList || []).map((org: BetterAuthOrganization) => ({
+      id: org.id,
+      name: org.name,
+      slug: org.slug,
+      role: "member", // This would come from the members join - for now default to member
+    })),
     refresh: loadWorkspace,
   };
 
   return (
-    <WorkspaceContextContext.Provider value={value}>
-      {children}
-    </WorkspaceContextContext.Provider>
+    <WorkspaceContextContext.Provider value={value}>{children}</WorkspaceContextContext.Provider>
   );
 }
 
@@ -271,9 +249,7 @@ export function useAppAccess(app: "precision" | "momentum") {
   }
 
   const permission =
-    app === "precision"
-      ? workspace.precision_permission
-      : workspace.momentum_permission;
+    app === "precision" ? workspace.precision_permission : workspace.momentum_permission;
 
   const hierarchy: AppPermissionLevel[] = ["none", "read", "write", "admin"];
   const permissionLevel = hierarchy.indexOf(permission);

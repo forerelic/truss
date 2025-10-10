@@ -96,10 +96,7 @@ function validateFile(filePath: string, fileName: string) {
   }
 
   // Check for RLS (should have it)
-  if (
-    content.includes("CREATE TABLE") &&
-    !content.includes("ROW LEVEL SECURITY")
-  ) {
+  if (content.includes("CREATE TABLE") && !content.includes("ROW LEVEL SECURITY")) {
     errors.push({
       file: fileName,
       issue: "Table created without enabling RLS - security risk",
@@ -111,9 +108,7 @@ function validateFile(filePath: string, fileName: string) {
 try {
   if (targetFile) {
     // Validate specific file
-    const filePath = targetFile.startsWith("/")
-      ? targetFile
-      : join(MIGRATIONS_DIR, targetFile);
+    const filePath = targetFile.startsWith("/") ? targetFile : join(MIGRATIONS_DIR, targetFile);
     validateFile(filePath, targetFile);
   } else {
     // Validate all migrations
@@ -158,9 +153,7 @@ try {
     console.log("\n❌ Validation failed. Fix errors before proceeding.");
     process.exit(1);
   } else {
-    console.log(
-      "\n✅ No critical errors. Warnings can be reviewed but are not blocking.",
-    );
+    console.log("\n✅ No critical errors. Warnings can be reviewed but are not blocking.");
     process.exit(0);
   }
 } catch (error) {

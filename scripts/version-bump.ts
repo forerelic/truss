@@ -50,13 +50,8 @@ if (!app || !APPS[app]) {
   process.exit(1);
 }
 
-if (
-  !versionType ||
-  !["major", "minor", "patch", "prerelease"].includes(versionType)
-) {
-  console.error(
-    "❌ Invalid version type. Use: major, minor, patch, or prerelease",
-  );
+if (!versionType || !["major", "minor", "patch", "prerelease"].includes(versionType)) {
+  console.error("❌ Invalid version type. Use: major, minor, patch, or prerelease");
   process.exit(1);
 }
 
@@ -115,26 +110,22 @@ try {
   console.log(`✅ Updated ${appConfig.path}/package.json`);
 
   // Create git commit and tag
-  const commitMessage =
-    values.message || `chore(${app}): bump version to ${newVersion}`;
+  const commitMessage = values.message || `chore(${app}): bump version to ${newVersion}`;
 
   try {
     execSync(`git add ${appConfig.path}/package.json`, { stdio: "inherit" });
     execSync(`git commit -m "${commitMessage}"`, { stdio: "inherit" });
 
     const tag = `${appConfig.tagPrefix}${newVersion}`;
-    execSync(
-      `git tag -a ${tag} -m "Release ${appConfig.name} v${newVersion}"`,
-      { stdio: "inherit" },
-    );
+    execSync(`git tag -a ${tag} -m "Release ${appConfig.name} v${newVersion}"`, {
+      stdio: "inherit",
+    });
 
     console.log(`✅ Created commit and tag: ${tag}`);
     console.log("\n🚀 To trigger release workflow:");
     console.log(`   git push origin main --tags`);
   } catch (gitError) {
-    console.error(
-      "⚠️  Git operations failed. You may need to commit manually.",
-    );
+    console.error("⚠️  Git operations failed. You may need to commit manually.");
   }
 } catch (error) {
   console.error("❌ Error:", error);

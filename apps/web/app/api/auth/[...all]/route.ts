@@ -34,15 +34,11 @@ function corsHeaders(origin: string | null) {
   const headers: Record<string, string> = {
     "Access-Control-Allow-Credentials": "true",
     "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-    "Access-Control-Allow-Headers":
-      "Content-Type, Authorization, X-Requested-With, Accept",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, X-Requested-With, Accept",
   };
 
   // Check if origin is allowed
-  if (
-    origin &&
-    (allowedOrigins.includes(origin) || process.env.NODE_ENV === "development")
-  ) {
+  if (origin && (allowedOrigins.includes(origin) || process.env.NODE_ENV === "development")) {
     headers["Access-Control-Allow-Origin"] = origin;
   } else if (process.env.NODE_ENV === "development") {
     // In development, allow any localhost origin

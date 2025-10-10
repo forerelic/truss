@@ -64,11 +64,7 @@ export function AuthTestView() {
       <div className="p-8 space-y-4 max-w-md mx-auto">
         <Card className="p-6 space-y-4">
           <h2 className="text-2xl font-bold">Sign Up</h2>
-          <Input
-            placeholder="Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
+          <Input placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} />
           <Input
             placeholder="Email"
             type="email"
@@ -175,9 +171,8 @@ export function AuthTestView() {
           </p>
           <p>
             <strong>Your Role:</strong>{" "}
-            {activeOrg.members?.find(
-              (m: BetterAuthMember) => m.userId === session.user.id,
-            )?.role || "N/A"}
+            {activeOrg.members?.find((m: BetterAuthMember) => m.userId === session.user.id)?.role ||
+              "N/A"}
           </p>
         </Card>
       )}

@@ -34,21 +34,9 @@ console.log(`${BLUE}🔍 Validating ${environment} environment...${RESET}\n`);
 
 // Environment-specific configuration
 const requiredEnvVars = {
-  local: [
-    "NEXT_PUBLIC_SUPABASE_URL",
-    "NEXT_PUBLIC_SUPABASE_ANON_KEY",
-    "DATABASE_URL",
-  ],
-  staging: [
-    "STAGING_PROJECT_ID",
-    "STAGING_DB_PASSWORD",
-    "SUPABASE_ACCESS_TOKEN",
-  ],
-  production: [
-    "PRODUCTION_PROJECT_ID",
-    "PRODUCTION_DB_PASSWORD",
-    "SUPABASE_ACCESS_TOKEN",
-  ],
+  local: ["NEXT_PUBLIC_SUPABASE_URL", "NEXT_PUBLIC_SUPABASE_ANON_KEY", "DATABASE_URL"],
+  staging: ["STAGING_PROJECT_ID", "STAGING_DB_PASSWORD", "SUPABASE_ACCESS_TOKEN"],
+  production: ["PRODUCTION_PROJECT_ID", "PRODUCTION_DB_PASSWORD", "SUPABASE_ACCESS_TOKEN"],
 };
 
 const checks = {
@@ -109,9 +97,7 @@ if (existsSync(envFile)) {
   }
 }
 
-const vars =
-  requiredEnvVars[environment as keyof typeof requiredEnvVars] ||
-  requiredEnvVars.local;
+const vars = requiredEnvVars[environment as keyof typeof requiredEnvVars] || requiredEnvVars.local;
 
 for (const varName of vars) {
   if (process.env[varName]) {
@@ -224,14 +210,11 @@ if (existsSync(migrationsDir)) {
     success(`Found ${count} migration files`);
 
     // Check for Better Auth migration
-    const authMigration =
-      await $`ls ${migrationsDir}/*better_auth*.sql 2>/dev/null`.quiet();
+    const authMigration = await $`ls ${migrationsDir}/*better_auth*.sql 2>/dev/null`.quiet();
     if (authMigration.stdout.toString().trim()) {
       success("Better Auth migration exists");
     } else {
-      warning(
-        'No Better Auth migration found - run "bun run scripts/generate-auth-migration.ts"',
-      );
+      warning('No Better Auth migration found - run "bun run scripts/generate-auth-migration.ts"');
     }
   } else {
     error("No migration files found");
@@ -272,23 +255,13 @@ if (existsSync(seedsDir)) {
 // ================================================
 console.log(`\n${BLUE}8. Checking TypeScript types...${RESET}`);
 
-const typesFile = join(
-  ROOT_DIR,
-  "packages",
-  "ui",
-  "src",
-  "lib",
-  "supabase",
-  "types.ts",
-);
+const typesFile = join(ROOT_DIR, "packages", "ui", "src", "lib", "supabase", "types.ts");
 if (existsSync(typesFile)) {
   const stats = await Bun.file(typesFile).text();
   if (stats.length > 100) {
     success("Supabase types file exists and has content");
   } else {
-    warning(
-      'Supabase types file exists but appears empty - run "bun run db:generate"',
-    );
+    warning('Supabase types file exists but appears empty - run "bun run db:generate"');
   }
 } else {
   warning('Supabase types not generated - run "bun run db:generate"');
@@ -299,9 +272,7 @@ if (existsSync(typesFile)) {
 // ================================================
 console.log(`\n${BLUE}9. Checking package.json scripts...${RESET}`);
 
-const packageJson = JSON.parse(
-  await Bun.file(join(ROOT_DIR, "package.json")).text(),
-);
+const packageJson = JSON.parse(await Bun.file(join(ROOT_DIR, "package.json")).text());
 const requiredScripts = [
   "db:start",
   "db:stop",
@@ -335,9 +306,7 @@ if (checks.failed === 0) {
   console.log(`\n${GREEN}✨ Environment validation passed!${RESET}`);
 
   if (checks.warnings > 0) {
-    console.log(
-      `${YELLOW}⚠️  Some warnings were found - review them above${RESET}`,
-    );
+    console.log(`${YELLOW}⚠️  Some warnings were found - review them above${RESET}`);
   }
 
   console.log("\nNext steps:");

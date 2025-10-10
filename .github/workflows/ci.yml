@@ -78,7 +78,6 @@ jobs:
 
       - name: 🧪 Run Tests (Shard ${{ matrix.shard }}/${{ matrix.total-shards }})
         run: bun test --shard=${{ matrix.shard }}/${{ matrix.total-shards }}
-        continue-on-error: true
 
       - name: 📊 Upload Coverage
         if: always()

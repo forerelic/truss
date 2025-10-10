@@ -22,12 +22,10 @@ export function getSupabaseClient() {
       ? (import.meta as { env?: Record<string, string> })
       : undefined;
 
-  const supabaseUrl =
-    process.env.NEXT_PUBLIC_SUPABASE_URL || meta?.env?.VITE_SUPABASE_URL;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || meta?.env?.VITE_SUPABASE_URL;
 
   const supabaseAnonKey =
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-    meta?.env?.VITE_SUPABASE_ANON_KEY;
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || meta?.env?.VITE_SUPABASE_ANON_KEY;
 
   if (!supabaseUrl || !supabaseAnonKey) {
     throw new Error(

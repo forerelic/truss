@@ -1,11 +1,6 @@
 import { useBetterAuthTauri } from "@daveyplate/better-auth-tauri/react";
 import { tauriAuthClient, useSession } from "@truss/ui/lib/auth/tauri-client";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@truss/ui/components/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@truss/ui/components/card";
 import { Button } from "@truss/ui/components/button";
 
 function App() {
@@ -69,9 +64,7 @@ function AuthView() {
     <div className="flex items-center justify-center min-h-screen bg-background p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-2xl text-center">
-            Welcome to Momentum
-          </CardTitle>
+          <CardTitle className="text-2xl text-center">Welcome to Momentum</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <p className="text-center text-muted-foreground">
@@ -97,12 +90,9 @@ function DashboardView({ user }: { user: any }) {
           <CardTitle>Momentum Dashboard</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground mb-4">
-            Welcome back, {user.name || user.email}!
-          </p>
+          <p className="text-muted-foreground mb-4">Welcome back, {user.name || user.email}!</p>
           <p className="text-sm text-muted-foreground">
-            🚧 Dashboard under construction. Start building your project
-            tracking features here.
+            🚧 Dashboard under construction. Start building your project tracking features here.
           </p>
         </CardContent>
       </Card>

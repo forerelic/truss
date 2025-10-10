@@ -1,0 +1,2 @@
+# Format staged files with Prettier
+bunx lint-staged

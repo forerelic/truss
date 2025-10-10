@@ -56,12 +56,7 @@ export const auth = betterAuth({
 export const tauriAuthClient = createAuthClient({
   baseURL: getBaseUrl(),
   // No custom storage - cookies handled automatically
-  plugins: [
-    inferAdditionalFields<typeof auth>(),
-    twoFactorClient(),
-    organizationClient(),
-    adminClient(),
-  ],
+  plugins: [inferAdditionalFields<typeof auth>(), twoFactorClient(), organizationClient(), adminClient()],
 });
 ```
 

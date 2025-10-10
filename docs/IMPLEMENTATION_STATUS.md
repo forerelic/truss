@@ -54,15 +54,7 @@
 {
   "envMode": "strict", // Was: "loose"
   "globalEnv": ["CI", "NODE_ENV"], // Removed: VERCEL_URL, VERCEL_BRANCH_URL, etc.
-  "globalPassThroughEnv": [
-    "TURBO_TOKEN",
-    "TURBO_TEAM",
-    "TURBO_REMOTE_ONLY",
-    "SUPABASE_ACCESS_TOKEN",
-    "GITHUB_TOKEN",
-    "STAGING_PROJECT_ID",
-    "PRODUCTION_PROJECT_ID"
-  ]
+  "globalPassThroughEnv": ["TURBO_TOKEN", "TURBO_TEAM", "TURBO_REMOTE_ONLY", "SUPABASE_ACCESS_TOKEN", "GITHUB_TOKEN", "STAGING_PROJECT_ID", "PRODUCTION_PROJECT_ID"]
 }
 ```
 

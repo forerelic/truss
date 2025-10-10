@@ -23,10 +23,46 @@ permissions:
 
 jobs:
   # ==============================================
+  # Determine which app to build
+  # ==============================================
+  setup:
+    name: 📋 Determine App
+    runs-on: ubuntu-latest
+    outputs:
+      app: ${{ steps.determine-app.outputs.app }}
+      app-name: ${{ steps.determine-app.outputs.app-name }}
+    steps:
+      - name: 🔍 Determine App from Tag or Input
+        id: determine-app
+        run: |
+          if [ -n "${{ github.event.inputs.app }}" ]; then
+            APP="${{ github.event.inputs.app }}"
+          elif [[ "${{ github.ref_name }}" == precision-v* ]]; then
+            APP="precision"
+          elif [[ "${{ github.ref_name }}" == momentum-v* ]]; then
+            APP="momentum"
+          else
+            echo "Error: Could not determine app from tag: ${{ github.ref_name }}"
+            exit 1
+          fi
+
+          echo "app=$APP" >> $GITHUB_OUTPUT
+
+          # Capitalize for display name
+          if [ "$APP" == "precision" ]; then
+            echo "app-name=Precision" >> $GITHUB_OUTPUT
+          elif [ "$APP" == "momentum" ]; then
+            echo "app-name=Momentum" >> $GITHUB_OUTPUT
+          fi
+
+          echo "Building app: $APP"
+
+  # ==============================================
   # Build Desktop Apps
   # ==============================================
   build:
-    name: 🏗️ Build ${{ matrix.platform }}
+    name: 🏗️ Build ${{ needs.setup.outputs.app-name }} - ${{ matrix.platform }}
+    needs: setup
     strategy:
       fail-fast: false
       max-parallel: 3
@@ -67,7 +103,7 @@ jobs:
       - name: 🗄️ Rust Cache
         uses: swatinem/rust-cache@v2
         with:
-          workspaces: "./apps/${{ github.event.inputs.app || (contains(github.ref, 'precision') && 'precision' || 'momentum') }}/src-tauri -> target"
+          workspaces: "./apps/${{ needs.setup.outputs.app }}/src-tauri -> target"
 
       - name: 🔧 Install System Dependencies (Ubuntu)
         if: matrix.platform == 'ubuntu-22.04'
@@ -135,12 +171,12 @@ jobs:
           VITE_SUPABASE_ANON_KEY: ${{ secrets.PRODUCTION_SUPABASE_ANON_KEY }}
           VITE_BETTER_AUTH_URL: ${{ secrets.NEXT_PUBLIC_APP_URL }}
         with:
-          projectPath: apps/${{ github.event.inputs.app || (contains(github.ref, 'precision') && 'precision' || 'momentum') }}
+          projectPath: apps/${{ needs.setup.outputs.app }}
           args: ${{ matrix.args }}
           tagName: ${{ github.ref_name }}
-          releaseName: ${{ github.event.inputs.app || (contains(github.ref, 'precision') && 'Precision' || 'Momentum') }} v${{ github.event.inputs.version || github.ref_name }}
+          releaseName: ${{ needs.setup.outputs.app-name }} v${{ github.event.inputs.version || github.ref_name }}
           releaseBody: |
-            See the full changelog at [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/apps/${{ github.event.inputs.app || (contains(github.ref, 'precision') && 'precision' || 'momentum') }}/CHANGELOG.md)
+            See the full changelog at [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/apps/${{ needs.setup.outputs.app }}/CHANGELOG.md)
 
             ## Installation
 
@@ -166,7 +202,7 @@ jobs:
   homebrew:
     name: 🍺 Update Homebrew Formula
     runs-on: ubuntu-latest
-    needs: build
+    needs: [setup, build]
     if: success() && !contains(github.ref_name, 'beta') && !contains(github.ref_name, 'alpha')
 
     steps:
@@ -186,7 +222,7 @@ jobs:
   announce:
     name: 📣 Announce Release
     runs-on: ubuntu-latest
-    needs: build
+    needs: [setup, build]
     if: success()
 
     steps:
@@ -196,7 +232,7 @@ jobs:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         run: |
           curl -H "Content-Type: application/json" \
-            -d "{\"content\": \"🚀 New release: ${{ github.event.inputs.app || (contains(github.ref, 'precision') && 'Precision' || 'Momentum') }} ${{ github.ref_name }}\\n\\nDownload: https://github.com/${{ github.repository }}/releases/tag/${{ github.ref_name }}\"}" \
+            -d "{\"content\": \"🚀 New release: ${{ needs.setup.outputs.app-name }} ${{ github.ref_name }}\\n\\nDownload: https://github.com/${{ github.repository }}/releases/tag/${{ github.ref_name }}\"}" \
             $DISCORD_WEBHOOK
 
       - name: 🐦 Tweet Release

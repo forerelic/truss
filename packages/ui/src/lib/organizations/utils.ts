@@ -4,12 +4,7 @@ import type { AppPermissionLevel, PermissionCheck, AppAccess } from "./types";
  * Permission level hierarchy for comparison
  * Higher index = more permissions
  */
-const PERMISSION_HIERARCHY: AppPermissionLevel[] = [
-  "none",
-  "read",
-  "write",
-  "admin",
-];
+const PERMISSION_HIERARCHY: AppPermissionLevel[] = ["none", "read", "write", "admin"];
 
 /**
  * Check if a permission level meets the minimum requirement
@@ -19,10 +14,7 @@ const PERMISSION_HIERARCHY: AppPermissionLevel[] = [
  * hasPermission('read', 'write') // false (read < write)
  * hasPermission('admin', 'write') // true (admin >= write)
  */
-export function hasPermission(
-  granted: AppPermissionLevel,
-  required: AppPermissionLevel,
-): boolean {
+export function hasPermission(granted: AppPermissionLevel, required: AppPermissionLevel): boolean {
   const grantedIndex = PERMISSION_HIERARCHY.indexOf(granted);
   const requiredIndex = PERMISSION_HIERARCHY.indexOf(required);
 
@@ -60,9 +52,7 @@ export function checkPermission(
  * getHighestPermission(['read', 'write', 'admin']) // 'admin'
  * getHighestPermission(['none', 'read']) // 'read'
  */
-export function getHighestPermission(
-  permissions: AppPermissionLevel[],
-): AppPermissionLevel {
+export function getHighestPermission(permissions: AppPermissionLevel[]): AppPermissionLevel {
   let highest: AppPermissionLevel = "none";
 
   for (const permission of permissions) {
@@ -77,12 +67,9 @@ export function getHighestPermission(
 /**
  * Check if user can perform an action based on permission level
  */
-export const canView = (permission: AppPermissionLevel) =>
-  hasPermission(permission, "read");
-export const canEdit = (permission: AppPermissionLevel) =>
-  hasPermission(permission, "write");
-export const canAdmin = (permission: AppPermissionLevel) =>
-  hasPermission(permission, "admin");
+export const canView = (permission: AppPermissionLevel) => hasPermission(permission, "read");
+export const canEdit = (permission: AppPermissionLevel) => hasPermission(permission, "write");
+export const canAdmin = (permission: AppPermissionLevel) => hasPermission(permission, "admin");
 
 /**
  * Get display label for permission level

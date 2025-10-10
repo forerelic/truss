@@ -1,0 +1,86 @@
+name: 🔒 CodeQL Security Analysis
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+  schedule:
+    # Run at 2 AM UTC every Monday
+    - cron: "0 2 * * 1"
+  workflow_dispatch:
+
+permissions:
+  actions: read
+  contents: read
+  security-events: write
+
+concurrency:
+  group: codeql-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # ==============================================
+  # CodeQL Analysis
+  # ==============================================
+  analyze:
+    name: 🔍 Analyze (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: ["javascript-typescript"]
+        # CodeQL supports: 'c-cpp', 'csharp', 'go', 'java-kotlin', 'javascript-typescript', 'python', 'ruby', 'swift'
+        # Learn more: https://aka.ms/codeql-docs/language-support
+
+    steps:
+      - name: 📥 Checkout
+        uses: actions/checkout@v4
+
+      - name: 🧰 Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: 📦 Install Dependencies
+        run: bun install --frozen-lockfile
+
+      # Initializes the CodeQL tools for scanning
+      - name: 🔧 Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          queries: +security-extended,security-and-quality
+          # If you wish to specify custom queries, you can do so here or in a config file
+          # See https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/configuring-code-scanning
+
+      # Autobuild attempts to build any compiled languages (C/C++, C#, Go, Java, or Swift)
+      # If this step fails, remove it and manually build your code
+      - name: 🏗️ Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      # Perform CodeQL analysis
+      - name: 🔍 Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{matrix.language}}"
+          # Upload results as SARIF for better integration
+          upload: true
+          # Don't fail the workflow on security issues (report only)
+          # Set to 'true' to fail on high/critical issues
+          fail_build: false
+
+      - name: 📊 Upload Analysis Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: codeql-results-${{ matrix.language }}
+          path: |
+            ${{ github.workspace }}/codeql-results
+          retention-days: 30

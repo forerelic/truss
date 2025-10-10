@@ -48,8 +48,7 @@ try {
   const dbUrl = "postgresql://postgres:postgres@127.0.0.1:54322/postgres";
 
   // Generate Better Auth schema to stdout
-  const result =
-    await $`DATABASE_URL=${dbUrl} bunx @better-auth/cli generate --output -`.quiet();
+  const result = await $`DATABASE_URL=${dbUrl} bunx @better-auth/cli generate --output -`.quiet();
 
   if (result.exitCode !== 0) {
     throw new Error(`Better Auth CLI failed: ${result.stderr}`);

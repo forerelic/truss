@@ -32,9 +32,7 @@ if (!existsSync(ENV_FILE)) {
   process.exit(1);
 }
 
-console.log(
-  "⚠️  This will create a new migration with ALL current schema changes.",
-);
+console.log("⚠️  This will create a new migration with ALL current schema changes.");
 console.log("   Review the migration file before committing!");
 console.log("\n   Press Ctrl+C within 5 seconds to cancel...\n");
 await Bun.sleep(5000);

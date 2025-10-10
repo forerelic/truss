@@ -1,12 +1,7 @@
 "use client";
 
 import { getSupabaseClient } from "../supabase/client";
-import type {
-  AppName,
-  AppPermissionLevel,
-  MemberWithPermissions,
-  OrganizationRole,
-} from "./types";
+import type { AppName, AppPermissionLevel, MemberWithPermissions, OrganizationRole } from "./types";
 
 // Database row types (until Better Auth migrations are run)
 interface AppPermissionRow {
@@ -59,10 +54,8 @@ export async function getMemberAppPermissions(
   };
 
   data?.forEach((perm) => {
-    if (perm.app === "precision")
-      permissions.precision = perm.permission as AppPermissionLevel;
-    if (perm.app === "momentum")
-      permissions.momentum = perm.permission as AppPermissionLevel;
+    if (perm.app === "precision") permissions.precision = perm.permission as AppPermissionLevel;
+    if (perm.app === "momentum") permissions.momentum = perm.permission as AppPermissionLevel;
   });
 
   return permissions;

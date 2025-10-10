@@ -47,9 +47,7 @@ class ReleaseManager {
 
     // Check for uncommitted changes
     if (!this.checkGitStatus()) {
-      console.log(
-        "❌ You have uncommitted changes. Please commit or stash them first.",
-      );
+      console.log("❌ You have uncommitted changes. Please commit or stash them first.");
       process.exit(1);
     }
 
@@ -155,14 +153,8 @@ class ReleaseManager {
     }
   }
 
-  calculateNewVersion(
-    current: string,
-    type: VersionType,
-    channel: Channel,
-  ): string {
-    const [major, minor, patch] = current
-      .split(".")
-      .map((v) => parseInt(v.split("-")[0]));
+  calculateNewVersion(current: string, type: VersionType, channel: Channel): string {
+    const [major, minor, patch] = current.split(".").map((v) => parseInt(v.split("-")[0]));
 
     switch (type) {
       case "major":
@@ -240,9 +232,7 @@ class ReleaseManager {
       });
 
       // 5. Push changes
-      const pushAnswer = await question(
-        "\nPush to GitHub and trigger release workflow? (y/N): ",
-      );
+      const pushAnswer = await question("\nPush to GitHub and trigger release workflow? (y/N): ");
       if (pushAnswer.toLowerCase() === "y") {
         console.log("5️⃣ Pushing to GitHub...");
         execSync("git push origin main", { stdio: "inherit" });
@@ -254,9 +244,7 @@ class ReleaseManager {
 
         if (releaseType.channel !== "stable") {
           console.log(`\n📢 This is a ${releaseType.channel} release`);
-          console.log(
-            `Users on the ${releaseType.channel} channel will receive this update`,
-          );
+          console.log(`Users on the ${releaseType.channel} channel will receive this update`);
         }
       } else {
         console.log("\n📝 Changes committed locally. Push when ready:");

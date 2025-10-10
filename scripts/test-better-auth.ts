@@ -32,10 +32,7 @@ console.log(`${BLUE}🔐 Testing Better Auth Integration${RESET}\n`);
 let testsPassed = 0;
 let testsFailed = 0;
 
-async function runTest(
-  name: string,
-  test: () => Promise<boolean>,
-): Promise<void> {
+async function runTest(name: string, test: () => Promise<boolean>): Promise<void> {
   process.stdout.write(`Testing ${name}... `);
 
   try {
@@ -57,15 +54,7 @@ async function runTest(
 // Test 1: Check Better Auth server configuration
 // ================================================
 await runTest("Better Auth server configuration exists", async () => {
-  const serverPath = join(
-    ROOT_DIR,
-    "packages",
-    "ui",
-    "src",
-    "lib",
-    "auth",
-    "server.ts",
-  );
+  const serverPath = join(ROOT_DIR, "packages", "ui", "src", "lib", "auth", "server.ts");
   const file = Bun.file(serverPath);
   const exists = await file.exists();
 
@@ -85,15 +74,7 @@ await runTest("Better Auth server configuration exists", async () => {
 // Test 2: Check Better Auth client configuration
 // ================================================
 await runTest("Better Auth client configuration exists", async () => {
-  const clientPath = join(
-    ROOT_DIR,
-    "packages",
-    "ui",
-    "src",
-    "lib",
-    "auth",
-    "client.ts",
-  );
+  const clientPath = join(ROOT_DIR, "packages", "ui", "src", "lib", "auth", "client.ts");
   const file = Bun.file(clientPath);
   return await file.exists();
 });
@@ -166,8 +147,7 @@ await runTest("Multi-tenant permissions table exists", async () => {
       WHERE table_name = 'app_permissions'
       ORDER BY ordinal_position;
     `;
-    const colResult =
-      await $`bunx supabase db execute --sql "${colQuery}"`.quiet();
+    const colResult = await $`bunx supabase db execute --sql "${colQuery}"`.quiet();
     console.log("\n  App permissions columns:");
     console.log(colResult.stdout.toString().split("\n").slice(0, 5).join("\n"));
   }
@@ -233,8 +213,7 @@ await runTest("Performance indexes exist", async () => {
       AND indexdef LIKE '%${column}%';
     `;
     const result = await $`bunx supabase db execute --sql "${query}"`.quiet();
-    const exists =
-      parseInt(result.stdout.toString().trim().split("\n").pop() || "0") > 0;
+    const exists = parseInt(result.stdout.toString().trim().split("\n").pop() || "0") > 0;
 
     if (verbose) {
       console.log(`\n  - Index on ${table}.${column}: ${exists ? "✓" : "✗"}`);
@@ -253,8 +232,7 @@ await runTest("Performance indexes exist", async () => {
 await runTest("Development seed data loads correctly", async () => {
   // Only test if in development
   const envQuery = `SELECT current_setting('app.environment', true);`;
-  const envResult =
-    await $`bunx supabase db execute --sql "${envQuery}"`.quiet();
+  const envResult = await $`bunx supabase db execute --sql "${envQuery}"`.quiet();
 
   if (
     !envResult.stdout.toString().includes("development") &&
@@ -269,9 +247,7 @@ await runTest("Development seed data loads correctly", async () => {
   // Check for test users
   const query = `SELECT COUNT(*) FROM "user";`;
   const result = await $`bunx supabase db execute --sql "${query}"`.quiet();
-  const count = parseInt(
-    result.stdout.toString().trim().split("\n").pop() || "0",
-  );
+  const count = parseInt(result.stdout.toString().trim().split("\n").pop() || "0");
 
   if (verbose) {
     console.log(`\n  Found ${count} users in database`);
@@ -321,11 +297,7 @@ if (testsFailed === 0) {
   console.log("\nTroubleshooting:");
   console.log("1. Ensure local Supabase is running: bun run db:start");
   console.log("2. Run migrations: bun run db:reset");
-  console.log(
-    "3. Generate Better Auth migration: bun run scripts/generate-auth-migration.ts",
-  );
-  console.log(
-    "4. Check Better Auth configuration in packages/ui/src/lib/auth/server.ts",
-  );
+  console.log("3. Generate Better Auth migration: bun run scripts/generate-auth-migration.ts");
+  console.log("4. Check Better Auth configuration in packages/ui/src/lib/auth/server.ts");
   process.exit(1);
 }

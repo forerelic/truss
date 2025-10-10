@@ -52,32 +52,12 @@
     "ci:test": "bun run lint && bun run check-types && bun run format:check",
     "ci:build": "bun run build",
     "precommit": "bun run ci:test",
-    "============ RELEASES ============": "",
-    "version:bump": "bun run scripts/version-bump.ts",
-    "version:web:patch": "bun run scripts/version-bump.ts web patch",
-    "version:web:minor": "bun run scripts/version-bump.ts web minor",
-    "version:web:major": "bun run scripts/version-bump.ts web major",
-    "version:web:prerelease": "bun run scripts/version-bump.ts web prerelease",
-    "version:precision:patch": "bun run scripts/version-bump.ts precision patch",
-    "version:precision:minor": "bun run scripts/version-bump.ts precision minor",
-    "version:precision:major": "bun run scripts/version-bump.ts precision major",
-    "version:precision:prerelease": "bun run scripts/version-bump.ts precision prerelease",
-    "version:momentum:patch": "bun run scripts/version-bump.ts momentum patch",
-    "version:momentum:minor": "bun run scripts/version-bump.ts momentum minor",
-    "version:momentum:major": "bun run scripts/version-bump.ts momentum major",
-    "version:momentum:prerelease": "bun run scripts/version-bump.ts momentum prerelease",
-    "changelog": "bun run scripts/generate-changelog.ts",
-    "changelog:web": "bun run scripts/generate-changelog.ts web",
-    "changelog:precision": "bun run scripts/generate-changelog.ts precision",
-    "changelog:momentum": "bun run scripts/generate-changelog.ts momentum",
-    "release:web": "bun run version:web:patch && bun run changelog:web && git push origin main --tags",
-    "release:precision": "bun run version:precision:patch && bun run changelog:precision && git push origin main --tags",
-    "release:momentum": "bun run version:momentum:patch && bun run changelog:momentum && git push origin main --tags",
-    "release:manager": "bun run scripts/release-manager.ts",
-    "release:create": "bun run scripts/create-release.ts",
+    "============ RELEASES (Changesets - Automated) ============": "",
     "changeset": "changeset",
     "changeset:version": "changeset version",
-    "changeset:publish": "changeset publish"
+    "changeset:publish": "changeset publish",
+    "release": "bun run changeset:version && bun run changeset:publish",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@changesets/changelog-github": "^0.5.1",
@@ -85,6 +65,8 @@
     "@types/pg": "^8.15.5",
     "concurrently": "^9.2.1",
     "esbuild": "~0.18.20",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.3",
     "prettier": "^3.6.2",
     "supabase": "^2.48.3",
     "turbo": "^2.5.8",
@@ -110,5 +92,13 @@
   "overrides": {
     "@types/react": "19.1.0",
     "@types/react-dom": "19.1.1"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "prettier --write"
+    ],
+    "*.{json,md,yml,yaml}": [
+      "prettier --write"
+    ]
   }
 }

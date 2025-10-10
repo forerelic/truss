@@ -1,0 +1,53 @@
+# ==============================================
+# CODEOWNERS - Automated PR Review Assignments
+# ==============================================
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+#
+# These owners will be automatically requested for review
+# when someone opens a pull request that modifies code
+# in the specified paths.
+
+# ==============================================
+# Default owner for everything in the repo
+# ==============================================
+* @forerelic
+
+# ==============================================
+# Applications
+# ==============================================
+/apps/web/ @forerelic
+/apps/precision/ @forerelic
+/apps/momentum/ @forerelic
+
+# ==============================================
+# Shared Packages
+# ==============================================
+/packages/ui/ @forerelic
+/packages/eslint-config/ @forerelic
+/packages/typescript-config/ @forerelic
+
+# ==============================================
+# CI/CD and Configuration
+# ==============================================
+/.github/ @forerelic
+/.github/workflows/ @forerelic
+/turbo.json @forerelic
+/package.json @forerelic
+
+# ==============================================
+# Database and Migrations
+# ==============================================
+/supabase/ @forerelic
+/supabase/migrations/ @forerelic
+
+# ==============================================
+# Scripts and Tooling
+# ==============================================
+/scripts/ @forerelic
+
+# ==============================================
+# Documentation
+# ==============================================
+/CLAUDE.md @forerelic
+/README.md @forerelic
+*.md @forerelic
