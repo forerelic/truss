@@ -12,6 +12,11 @@ import { NextRequest, NextResponse } from "next/server";
  * All requests to /api/auth/* are processed by Better Auth
  */
 
+// Force dynamic rendering - don't try to statically generate this route
+// This prevents Next.js from trying to execute the auth handler during build time
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
+
 // Convert Better Auth to Next.js route handlers
 const authHandler = toNextJsHandler(auth);
 
