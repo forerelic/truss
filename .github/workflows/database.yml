@@ -80,6 +80,8 @@ jobs:
     needs: validate
     if: github.ref == 'refs/heads/develop' || github.event.inputs.environment == 'staging'
     environment: staging
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout code
@@ -123,6 +125,8 @@ jobs:
     needs: validate
     if: github.ref == 'refs/heads/main' || github.event.inputs.environment == 'production'
     environment: production
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout code
