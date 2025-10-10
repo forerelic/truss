@@ -228,6 +228,7 @@ VITE_AUTO_UPDATE_URL=https://...
 ### Website Deployment
 
 The website uses **Vercel's automatic Git integration**:
+
 - Automatically deploys on every push to `main`
 - Preview deployments for all PRs
 - No GitHub Actions needed - configure in Vercel dashboard
