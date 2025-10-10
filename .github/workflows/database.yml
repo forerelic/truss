@@ -124,7 +124,7 @@ jobs:
         run: bunx prettier --write packages/ui/src/lib/supabase/types.ts
 
       - name: Commit generated types
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: stefanzweifel/git-auto-commit-action@v6
         with:
           commit_message: "chore: update supabase types [skip ci]"
           file_pattern: "packages/ui/src/lib/supabase/types.ts"
@@ -184,7 +184,7 @@ jobs:
         run: bunx prettier --write packages/ui/src/lib/supabase/types.ts
 
       - name: Commit generated types
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: stefanzweifel/git-auto-commit-action@v6
         with:
           commit_message: "chore: update production supabase types [skip ci]"
           file_pattern: "packages/ui/src/lib/supabase/types.ts"
