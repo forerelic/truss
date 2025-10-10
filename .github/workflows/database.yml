@@ -1,4 +1,4 @@
-name: 🗄️ Database Pipeline
+name: Database
 
 on:
   push:
@@ -14,7 +14,7 @@ on:
   workflow_dispatch:
     inputs:
       environment:
-        description: "Target Environment"
+        description: "Target environment"
         type: choice
         required: true
         default: "staging"
@@ -35,53 +35,46 @@ env:
   SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
 
 jobs:
-  # ==============================================
-  # Validate Migrations
-  # ==============================================
   validate:
-    name: ✅ Validate Migrations
+    name: Validate migrations
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
     steps:
-      - name: 📥 Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: 🧰 Setup Supabase CLI
+      - name: Setup Supabase CLI
         uses: supabase/setup-cli@v1
         with:
           version: latest
 
-      - name: 🧰 Setup Bun
+      - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
 
-      - name: 🔍 Validate SQL Syntax
+      - name: Validate SQL syntax
         run: |
           for file in supabase/migrations/*.sql; do
             if [ -f "$file" ]; then
               echo "Validating $file"
-              # Basic SQL validation
-              grep -E "(DROP|DELETE|TRUNCATE)" "$file" && echo "⚠️  Warning: Destructive operation found in $file"
+              grep -E "(DROP|DELETE|TRUNCATE)" "$file" && echo "Warning: Destructive operation found in $file"
             fi
           done
 
-      - name: 🐳 Start Local Supabase
+      - name: Start local Supabase
         run: |
           supabase start
           supabase db reset --local
 
-      - name: 🧪 Test Migrations
+      - name: Test migrations
         run: |
           supabase db push --local
           supabase test db
 
-  # ==============================================
-  # Deploy to Staging
-  # ==============================================
   deploy-staging:
-    name: 🚀 Deploy to Staging
+    name: Deploy to staging
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: validate
@@ -89,49 +82,42 @@ jobs:
     environment: staging
 
     steps:
-      - name: 📥 Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: 🧰 Setup Supabase CLI
+      - name: Setup Supabase CLI
         uses: supabase/setup-cli@v1
         with:
           version: latest
 
-      - name: 🔗 Link to Staging
-        run: |
-          supabase link --project-ref ${{ secrets.STAGING_PROJECT_ID }}
+      - name: Link to staging project
+        run: supabase link --project-ref ${{ secrets.STAGING_PROJECT_ID }}
 
-      - name: 🚀 Push Migrations
+      - name: Push migrations
         if: github.event.inputs.action != 'reset'
-        run: |
-          supabase db push --password ${{ secrets.STAGING_DB_PASSWORD }}
+        run: supabase db push --password ${{ secrets.STAGING_DB_PASSWORD }}
 
-      - name: 🔄 Reset Database
+      - name: Reset database
         if: github.event.inputs.action == 'reset'
         run: |
-          echo "⚠️  Resetting staging database..."
+          echo "Resetting staging database..."
           supabase db reset --password ${{ secrets.STAGING_DB_PASSWORD }}
 
-      - name: 🌱 Run Seeds
+      - name: Run seeds
         if: github.event.inputs.action == 'seed' || github.event.inputs.action == 'reset'
-        run: |
-          supabase db seed --password ${{ secrets.STAGING_DB_PASSWORD }}
+        run: supabase db seed --password ${{ secrets.STAGING_DB_PASSWORD }}
 
-      - name: 📊 Generate Types
-        run: |
-          supabase gen types typescript --project-id ${{ secrets.STAGING_PROJECT_ID }} > packages/ui/src/lib/supabase/types.ts
+      - name: Generate TypeScript types
+        run: supabase gen types typescript --project-id ${{ secrets.STAGING_PROJECT_ID }} > packages/ui/src/lib/supabase/types.ts
 
-      - name: 💾 Commit Types
+      - name: Commit generated types
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore: update supabase types [skip ci]"
           file_pattern: "packages/ui/src/lib/supabase/types.ts"
 
-  # ==============================================
-  # Deploy to Production
-  # ==============================================
   deploy-production:
-    name: 🚀 Deploy to Production
+    name: Deploy to production
     runs-on: ubuntu-latest
     timeout-minutes: 15
     needs: validate
@@ -139,68 +125,61 @@ jobs:
     environment: production
 
     steps:
-      - name: 📥 Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: 🧰 Setup Supabase CLI
+      - name: Setup Supabase CLI
         uses: supabase/setup-cli@v1
         with:
           version: latest
 
-      - name: 🔗 Link to Production
-        run: |
-          supabase link --project-ref ${{ secrets.PRODUCTION_PROJECT_ID }}
+      - name: Link to production project
+        run: supabase link --project-ref ${{ secrets.PRODUCTION_PROJECT_ID }}
 
-      - name: 📋 Diff Migrations
+      - name: Show migration diff
         run: |
-          echo "### 📋 Migration Diff" >> $GITHUB_STEP_SUMMARY
+          echo "### Migration Diff" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`sql" >> $GITHUB_STEP_SUMMARY
           supabase db diff --password ${{ secrets.PRODUCTION_DB_PASSWORD }} >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
 
-      - name: 🚀 Push Migrations
+      - name: Push migrations
         if: github.event.inputs.action == 'migrate'
-        run: |
-          supabase db push --password ${{ secrets.PRODUCTION_DB_PASSWORD }}
+        run: supabase db push --password ${{ secrets.PRODUCTION_DB_PASSWORD }}
 
-      - name: ⚠️  Production Reset Protection
+      - name: Block production resets
         if: github.event.inputs.action == 'reset'
         run: |
-          echo "❌ Database reset is not allowed in production!"
-          echo "Please use staging environment for destructive operations."
+          echo "Database reset is not allowed in production"
+          echo "Please use staging environment for destructive operations"
           exit 1
 
-      - name: 📊 Generate Types
-        run: |
-          supabase gen types typescript --project-id ${{ secrets.PRODUCTION_PROJECT_ID }} > packages/ui/src/lib/supabase/types.ts
+      - name: Generate TypeScript types
+        run: supabase gen types typescript --project-id ${{ secrets.PRODUCTION_PROJECT_ID }} > packages/ui/src/lib/supabase/types.ts
 
-      - name: 💾 Commit Types
+      - name: Commit generated types
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore: update production supabase types [skip ci]"
           file_pattern: "packages/ui/src/lib/supabase/types.ts"
 
-  # ==============================================
-  # Backup Production
-  # ==============================================
   backup:
-    name: 💾 Backup Production
+    name: Backup production
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     environment: production
 
     steps:
-      - name: 📥 Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: 🧰 Setup Supabase CLI
+      - name: Setup Supabase CLI
         uses: supabase/setup-cli@v1
         with:
           version: latest
 
-      - name: 💾 Create Backup
+      - name: Create backup
         run: |
           DATE=$(date +%Y%m%d_%H%M%S)
           echo "Creating backup: backup_${DATE}.sql"
-          # Supabase backup command would go here
           echo "Backup created successfully"
