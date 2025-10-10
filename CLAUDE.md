@@ -402,6 +402,362 @@ Time:     12.5s >>> FULL TURBO ⚡️
 - **Tag push `precision-v*`**: Precision release build
 - **Tag push `momentum-v*`**: Momentum release build
 
+## Deployment Pipeline (Local → Staging → Production)
+
+This project uses a **3-tier deployment pipeline** to safely move changes from development to production:
+
+```
+┌─────────────┐      ┌─────────────┐      ┌─────────────┐
+│   Local     │ ───▶ │   Staging   │ ───▶ │ Production  │
+│ Development │      │   Preview   │      │    Live     │
+└─────────────┘      └─────────────┘      └─────────────┘
+     │                     │                     │
+   Any branch           develop                main
+localhost:3000    staging.truss...    truss.forerelic.com
+```
+
+### Branch Strategy
+
+- **`main`**: Production-ready code → Deploys to production automatically
+- **`develop`**: Staging environment → Deploys to staging automatically
+- **Feature branches**: Local development only (no automatic deployments)
+
+### Environment Overview
+
+| Environment | Branch    | Web URL                               | Database            | Desktop Apps                |
+| ----------- | --------- | ------------------------------------- | ------------------- | --------------------------- |
+| Local       | Any       | `http://localhost:3000`               | Local/Staging DB    | `VITE_DEBUG_MODE=true`      |
+| Staging     | `develop` | `https://staging.truss.forerelic.com` | Staging Supabase    | Debug enabled, staging data |
+| Production  | `main`    | `https://truss.forerelic.com`         | Production Supabase | Debug disabled, live data   |
+
+### Website Deployment (Vercel Git Integration)
+
+**Automatic deployments:**
+
+1. **Production** (`main` branch):
+
+   ```bash
+   git checkout main
+   git merge develop  # After testing on staging
+   git push origin main
+   # ✅ Auto-deploys to truss.forerelic.com
+   ```
+
+2. **Staging** (`develop` branch):
+
+   ```bash
+   git checkout develop
+   git merge feature/my-feature
+   git push origin develop
+   # ✅ Auto-deploys to staging.truss.forerelic.com
+   ```
+
+3. **Preview** (Pull Requests):
+   - Every PR gets a unique preview URL
+   - Example: `truss-git-feature-team.vercel.app`
+   - Automatically deleted when PR is closed
+
+**Vercel Configuration:**
+
+- Production domain: `truss.forerelic.com` → `main` branch
+- Staging domain: `staging.truss.forerelic.com` → `develop` branch (Preview)
+- All environment variables configured in Vercel dashboard (see below)
+
+### Desktop App Deployment (GitHub Actions)
+
+Desktop apps can be built for **either staging or production** using the workflow dispatch:
+
+**Staging Build (for testing):**
+
+```bash
+# Via GitHub UI: Actions → Release Desktop Apps → Run workflow
+# Select:
+#   - App: precision (or momentum)
+#   - Version: 0.1.0-staging
+#   - Environment: staging
+```
+
+This builds desktop apps that connect to:
+
+- Web server: `https://staging.truss.forerelic.com`
+- Database: Staging Supabase
+- Debug mode: Enabled
+
+**Production Build (for release):**
+
+```bash
+# Via GitHub UI: Actions → Release Desktop Apps → Run workflow
+# Select:
+#   - App: precision (or momentum)
+#   - Version: 1.0.0
+#   - Environment: production
+
+# OR via Git tag (recommended):
+git tag precision-v1.0.0
+git push origin precision-v1.0.0
+# ✅ Automatically triggers production build
+```
+
+This builds desktop apps that connect to:
+
+- Web server: `https://truss.forerelic.com`
+- Database: Production Supabase
+- Debug mode: Disabled
+
+### Environment Files Structure
+
+Each app has environment files for each deployment target:
+
+```bash
+apps/web/
+  .env.local               # Local development (gitignored)
+  .env.production          # Production config (gitignored - copy from .example)
+  .env.staging             # Staging config (gitignored - copy from .example)
+  .env.example             # Local dev template (committed)
+  .env.production.example  # Production template (committed)
+  .env.staging.example     # Staging template (committed)
+
+apps/precision/
+  .env.local               # Local development (gitignored)
+  .env.production          # Production config (gitignored - copy from .example)
+  .env.staging             # Staging config (gitignored - copy from .example)
+  .env.example             # Local dev template (committed)
+  .env.production.example  # Production template (committed)
+  .env.staging.example     # Staging template (committed)
+
+apps/momentum/
+  .env.local               # Local development (gitignored)
+  .env.production          # Production config (gitignored - copy from .example)
+  .env.staging             # Staging config (gitignored - copy from .example)
+  .env.example             # Local dev template (committed)
+  .env.production.example  # Production template (committed)
+  .env.staging.example     # Staging template (committed)
+```
+
+**Key Points:**
+
+- ✅ `.env*.example` - Templates for each environment (committed to git)
+- ✅ `.env.local` - For local development (gitignored, copy from .env.example)
+- ✅ `.env.production` - Production config (gitignored, copy from .env.production.example)
+- ✅ `.env.staging` - Staging config (gitignored, copy from .env.staging.example)
+- ❌ **Never commit any `.env` file without `.example` suffix** (may contain secrets)
+
+### Vercel Environment Variables (Manual Setup Required)
+
+**IMPORTANT:** Vercel environment variables must be set manually in the Vercel dashboard for each environment.
+
+**Accessing Vercel Environment Variables:**
+
+```bash
+# Via Vercel dashboard:
+# 1. Go to: https://vercel.com/[team]/truss/settings/environment-variables
+# 2. Or use CLI to view (read-only):
+vercel env ls
+```
+
+**Production Environment Variables:**
+
+| Variable                        | Value                                | Scope      |
+| ------------------------------- | ------------------------------------ | ---------- |
+| `NEXT_PUBLIC_APP_URL`           | `https://truss.forerelic.com`        | Production |
+| `DATABASE_URL`                  | `postgresql://...` (production)      | Production |
+| `NEXT_PUBLIC_SUPABASE_URL`      | `https://[prod-project].supabase.co` | Production |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `eyJ...` (production anon key)       | Production |
+| `BETTER_AUTH_SECRET`            | `<32+ char secret>`                  | Production |
+
+**Staging/Preview Environment Variables:**
+
+| Variable                        | Value                                     | Scope   |
+| ------------------------------- | ----------------------------------------- | ------- |
+| `NEXT_PUBLIC_APP_URL`           | `https://staging.truss.forerelic.com`     | Preview |
+| `DATABASE_URL`                  | `postgresql://...` (staging)              | Preview |
+| `NEXT_PUBLIC_SUPABASE_URL`      | `https://[staging-project].supabase.co`   | Preview |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | `eyJ...` (staging anon key)               | Preview |
+| `BETTER_AUTH_SECRET`            | `<32+ char secret>` (can be same as prod) | Preview |
+
+**Adding Environment Variables (Vercel Dashboard Only):**
+
+⚠️ **Sensitive variables (DATABASE_URL, SUPABASE_ANON_KEY) MUST be added via Vercel dashboard** - CLI requires interactive input.
+
+1. Go to Vercel dashboard → Project → Settings → Environment Variables
+2. Click "Add New"
+3. Enter key/value
+4. Select environment scope (Production, Preview, or Development)
+5. Click "Save"
+
+**Verification:**
+
+```bash
+# Check current Vercel environment variables
+vercel env ls
+
+# Should show different values for Production vs Preview
+```
+
+### GitHub Secrets for Desktop Builds
+
+Desktop app builds require these GitHub secrets (set via `gh secret set`):
+
+**Staging Environment:**
+
+```bash
+STAGING_WEB_URL=https://staging.truss.forerelic.com
+STAGING_SUPABASE_URL=https://[staging-project].supabase.co
+STAGING_SUPABASE_ANON_KEY=eyJ...
+```
+
+**Production Environment:**
+
+```bash
+NEXT_PUBLIC_APP_URL=https://truss.forerelic.com
+PRODUCTION_SUPABASE_URL=https://[prod-project].supabase.co
+PRODUCTION_SUPABASE_ANON_KEY=eyJ...
+```
+
+**Setting Secrets:**
+
+```bash
+# Add staging secrets
+gh secret set STAGING_WEB_URL -b "https://staging.truss.forerelic.com"
+gh secret set STAGING_SUPABASE_URL -b "https://your-staging-project.supabase.co"
+gh secret set STAGING_SUPABASE_ANON_KEY -b "your-staging-anon-key"
+
+# Add production secrets
+gh secret set NEXT_PUBLIC_APP_URL -b "https://truss.forerelic.com"
+gh secret set PRODUCTION_SUPABASE_URL -b "https://your-prod-project.supabase.co"
+gh secret set PRODUCTION_SUPABASE_ANON_KEY -b "your-prod-anon-key"
+
+# Verify
+gh secret list
+```
+
+### Typical Development Workflow
+
+**1. Local Development:**
+
+```bash
+# Start local development
+git checkout -b feature/my-feature
+bun run dev:web        # Web app on localhost:3000
+bun run dev:precision  # Desktop app (connects to localhost:3000)
+
+# Make changes, test locally
+git add .
+git commit -m "feat: add new feature"
+git push origin feature/my-feature
+```
+
+**2. Deploy to Staging:**
+
+```bash
+# Merge feature to develop
+git checkout develop
+git merge feature/my-feature
+git push origin develop
+
+# ✅ Vercel auto-deploys to staging.truss.forerelic.com
+# ✅ Database migrations run on staging DB (if needed)
+# ✅ Test on staging environment
+```
+
+**3. Build Staging Desktop Apps (Optional):**
+
+```bash
+# Via GitHub UI: Actions → Release Desktop Apps → Run workflow
+# Select: App=precision, Version=0.1.0-staging, Environment=staging
+# Test desktop app with staging backend
+```
+
+**4. Deploy to Production:**
+
+```bash
+# After testing on staging, merge to main
+git checkout main
+git merge develop
+git push origin main
+
+# ✅ Vercel auto-deploys to truss.forerelic.com
+# ✅ Database migrations run on production DB (if configured)
+```
+
+**5. Release Production Desktop Apps:**
+
+```bash
+# Create and push version tag
+git tag precision-v1.0.0 -m "Release Precision v1.0.0"
+git push origin precision-v1.0.0
+
+# ✅ GitHub Actions builds production desktop installers
+# ✅ Creates GitHub Release with installers
+# ✅ Desktop apps connect to production backend
+```
+
+### Rollback Procedures
+
+**Website Rollback (Vercel):**
+
+```bash
+# Option 1: Via Vercel dashboard
+# 1. Go to Deployments
+# 2. Find previous working deployment
+# 3. Click "..." → "Promote to Production"
+
+# Option 2: Via Git revert
+git revert <bad-commit-hash>
+git push origin main  # Triggers new deployment
+```
+
+**Desktop App Rollback:**
+
+```bash
+# 1. Delete problematic GitHub Release
+gh release delete precision-v1.0.1
+
+# 2. Users on auto-update will stay on previous version
+# 3. Create new release with fix if needed
+```
+
+### Testing Before Production
+
+**Staging Checklist:**
+
+- [ ] Push to `develop` branch
+- [ ] Verify staging deployment: `https://staging.truss.forerelic.com`
+- [ ] Test authentication flow
+- [ ] Test database operations
+- [ ] Test desktop app with staging backend (if relevant)
+- [ ] Run integration tests (if available)
+- [ ] Check error logs in Vercel dashboard
+
+**Production Deployment:**
+
+- [ ] All staging tests passing
+- [ ] PR approved and merged to `main`
+- [ ] Database migrations tested on staging
+- [ ] Breaking changes documented
+- [ ] Changelog updated (if using Changesets)
+- [ ] Monitor production logs after deployment
+
+### Environment URLs Summary
+
+**Quick Reference:**
+
+```bash
+# Local Development
+Web:      http://localhost:3000
+Desktop:  Connects to localhost:3000 for BetterAuth
+
+# Staging
+Web:      https://staging.truss.forerelic.com
+Desktop:  Connects to staging.truss.forerelic.com for BetterAuth
+Database: Staging Supabase instance
+
+# Production
+Web:      https://truss.forerelic.com
+Desktop:  Connects to truss.forerelic.com for BetterAuth
+Database: Production Supabase instance
+```
+
 ## Development Guidelines
 
 ### Component Development

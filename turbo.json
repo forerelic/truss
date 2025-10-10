@@ -18,7 +18,13 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "inputs": ["$TURBO_DEFAULT$", ".env.local", ".env.production"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        ".env.local",
+        ".env.production",
+        ".env.staging",
+        ".env*.example"
+      ],
       "outputs": [".next/**", "!.next/cache/**", "dist/**", "src-tauri/target/release/**"],
       "env": [
         "NEXT_PUBLIC_*",
@@ -47,7 +53,7 @@
         "!dist/**"
       ],
       "outputs": [],
-      "env": ["DEV"]
+      "env": ["DEV", "EMAIL_FROM", "RESEND_API_KEY", "SKIP_ENV_VALIDATION"]
     },
     "check-types": {
       "dependsOn": ["^check-types"],
@@ -272,8 +278,15 @@
         "GOOGLE_CLIENT_SECRET",
         "BETTER_AUTH_SECRET",
         "DATABASE_URL",
-        "SUPABASE_DB_URL"
+        "SUPABASE_DB_URL",
+        "EMAIL_FROM",
+        "RESEND_API_KEY",
+        "SKIP_ENV_VALIDATION"
       ]
+    },
+    "@truss/web#lint": {
+      "dependsOn": ["^lint"],
+      "env": ["EMAIL_FROM", "RESEND_API_KEY", "SKIP_ENV_VALIDATION"]
     },
     "@truss/precision#build": {
       "dependsOn": ["^build"],

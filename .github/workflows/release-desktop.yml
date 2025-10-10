@@ -1,4 +1,4 @@
-name: 🖥️ Release Desktop Apps
+name: Release
 
 on:
   push:
@@ -17,22 +17,27 @@ on:
       version:
         description: "Version (e.g., 1.0.0)"
         required: true
+      environment:
+        description: "Target environment"
+        type: choice
+        required: true
+        default: "production"
+        options:
+          - production
+          - staging
 
 permissions:
   contents: write
 
 jobs:
-  # ==============================================
-  # Determine which app to build
-  # ==============================================
   setup:
-    name: 📋 Determine App
+    name: Determine app
     runs-on: ubuntu-latest
     outputs:
       app: ${{ steps.determine-app.outputs.app }}
       app-name: ${{ steps.determine-app.outputs.app-name }}
     steps:
-      - name: 🔍 Determine App from Tag or Input
+      - name: Determine app from tag or input
         id: determine-app
         run: |
           if [ -n "${{ github.event.inputs.app }}" ]; then
@@ -48,7 +53,6 @@ jobs:
 
           echo "app=$APP" >> $GITHUB_OUTPUT
 
-          # Capitalize for display name
           if [ "$APP" == "precision" ]; then
             echo "app-name=Precision" >> $GITHUB_OUTPUT
           elif [ "$APP" == "momentum" ]; then
@@ -57,11 +61,8 @@ jobs:
 
           echo "Building app: $APP"
 
-  # ==============================================
-  # Build Desktop Apps
-  # ==============================================
   build:
-    name: 🏗️ Build ${{ needs.setup.outputs.app-name }} - ${{ matrix.platform }}
+    name: Build ${{ needs.setup.outputs.app-name }} (${{ matrix.name }})
     needs: setup
     strategy:
       fail-fast: false
@@ -70,42 +71,42 @@ jobs:
         include:
           - platform: "macos-latest"
             target: "aarch64-apple-darwin,x86_64-apple-darwin"
-            name: "macOS Universal"
+            name: "macOS"
             args: "--target aarch64-apple-darwin --target x86_64-apple-darwin"
           - platform: "ubuntu-22.04"
             target: "x86_64-unknown-linux-gnu"
-            name: "Linux x64"
+            name: "Linux"
             args: ""
           - platform: "windows-latest"
             target: "x86_64-pc-windows-msvc"
-            name: "Windows x64"
+            name: "Windows"
             args: ""
 
     runs-on: ${{ matrix.platform }}
     timeout-minutes: 60
 
     steps:
-      - name: 📥 Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: 🧰 Setup Bun
+      - name: Setup Bun
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
 
-      - name: 🔧 Setup Rust
+      - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
         with:
           targets: ${{ matrix.target }}
 
-      - name: 🗄️ Rust Cache
+      - name: Cache Rust dependencies
         uses: swatinem/rust-cache@v2
         with:
           workspaces: "./apps/${{ needs.setup.outputs.app }}/src-tauri -> target"
 
-      - name: 🔧 Install System Dependencies (Ubuntu)
+      - name: Install system dependencies
         if: matrix.platform == 'ubuntu-22.04'
         run: |
           sudo apt-get update
@@ -117,10 +118,10 @@ jobs:
             patchelf \
             libssl-dev
 
-      - name: 📦 Install Dependencies
+      - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      - name: 🔑 Import Apple Certificates
+      - name: Import Apple certificates
         if: matrix.platform == 'macos-latest' && env.APPLE_CERTIFICATE
         env:
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
@@ -139,37 +140,27 @@ jobs:
           security set-key-partition-list -S apple-tool:,apple:,codesign: -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
           security list-keychain -d user -s $KEYCHAIN_PATH
 
-      - name: 🏗️ Build Tauri App
+      - name: Build application
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-          # Updater signing
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
-
-          # macOS signing & notarization
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
           APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
           APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
           APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
           APPLE_API_KEY_PATH: ${{ secrets.APPLE_API_KEY_PATH }}
-
-          # Fallback: Apple ID method (if API keys not set)
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-
-          # Windows signing
           WINDOWS_CERTIFICATE: ${{ secrets.WINDOWS_CERTIFICATE }}
           WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
-
-          # Frontend environment variables (VITE_ prefix required)
           VITE_APP_VERSION: ${{ github.ref_name }}
-          VITE_SUPABASE_URL: ${{ secrets.PRODUCTION_SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ secrets.PRODUCTION_SUPABASE_ANON_KEY }}
-          VITE_BETTER_AUTH_URL: ${{ secrets.NEXT_PUBLIC_APP_URL }}
+          VITE_SUPABASE_URL: ${{ github.event.inputs.environment == 'staging' && secrets.STAGING_SUPABASE_URL || secrets.PRODUCTION_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ github.event.inputs.environment == 'staging' && secrets.STAGING_SUPABASE_ANON_KEY || secrets.PRODUCTION_SUPABASE_ANON_KEY }}
+          VITE_BETTER_AUTH_URL: ${{ github.event.inputs.environment == 'staging' && secrets.STAGING_WEB_URL || secrets.NEXT_PUBLIC_APP_URL }}
         with:
           projectPath: apps/${{ needs.setup.outputs.app }}
           args: ${{ matrix.args }}
@@ -196,46 +187,39 @@ jobs:
           includeUpdaterJson: true
           updaterJsonPreferNsis: true
 
-  # ==============================================
-  # Update Homebrew Formula (macOS)
-  # ==============================================
   homebrew:
-    name: 🍺 Update Homebrew Formula
+    name: Update Homebrew formula
     runs-on: ubuntu-latest
     needs: [setup, build]
     if: success() && !contains(github.ref_name, 'beta') && !contains(github.ref_name, 'alpha')
 
     steps:
-      - name: 📥 Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: 🍺 Update Homebrew Formula
+      - name: Update formula
         env:
           HOMEBREW_GITHUB_TOKEN: ${{ secrets.HOMEBREW_GITHUB_TOKEN }}
         run: |
           echo "Homebrew formula update would go here"
-          # brew bump-formula-pr --url=... --sha256=...
 
-  # ==============================================
-  # Announce Release
-  # ==============================================
   announce:
-    name: 📣 Announce Release
+    name: Announce release
     runs-on: ubuntu-latest
     needs: [setup, build]
     if: success()
 
     steps:
-      - name: 📢 Send Discord Notification
+      - name: Send Discord notification
         if: env.DISCORD_WEBHOOK
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
         run: |
           curl -H "Content-Type: application/json" \
-            -d "{\"content\": \"🚀 New release: ${{ needs.setup.outputs.app-name }} ${{ github.ref_name }}\\n\\nDownload: https://github.com/${{ github.repository }}/releases/tag/${{ github.ref_name }}\"}" \
+            -d "{\"content\": \"New release: ${{ needs.setup.outputs.app-name }} ${{ github.ref_name }}\\n\\nDownload: https://github.com/${{ github.repository }}/releases/tag/${{ github.ref_name }}\"}" \
             $DISCORD_WEBHOOK
 
-      - name: 🐦 Tweet Release
+      - name: Tweet release
         if: env.TWITTER_API_KEY
         env:
           TWITTER_API_KEY: ${{ secrets.TWITTER_API_KEY }}
