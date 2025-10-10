@@ -24,8 +24,6 @@ updates:
           - "patch"
     assignees:
       - "forerelic"
-    reviewers:
-      - "forerelic"
     labels:
       - "dependencies"
       - "javascript"

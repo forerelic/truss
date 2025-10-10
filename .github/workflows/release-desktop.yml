@@ -29,17 +29,21 @@ jobs:
     name: 🏗️ Build ${{ matrix.platform }}
     strategy:
       fail-fast: false
+      max-parallel: 3
       matrix:
         include:
           - platform: "macos-latest"
-            target: "universal-apple-darwin"
-            name: "macOS"
+            target: "aarch64-apple-darwin,x86_64-apple-darwin"
+            name: "macOS Universal"
+            args: "--target aarch64-apple-darwin --target x86_64-apple-darwin"
           - platform: "ubuntu-22.04"
             target: "x86_64-unknown-linux-gnu"
-            name: "Linux"
+            name: "Linux x64"
+            args: ""
           - platform: "windows-latest"
             target: "x86_64-pc-windows-msvc"
-            name: "Windows"
+            name: "Windows x64"
+            args: ""
 
     runs-on: ${{ matrix.platform }}
     timeout-minutes: 60
@@ -47,6 +51,8 @@ jobs:
     steps:
       - name: 📥 Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: 🧰 Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -101,19 +107,36 @@ jobs:
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+          # Updater signing
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
-          TAURI_SIGNING_PUBLIC_KEY: ${{ secrets.TAURI_SIGNING_PUBLIC_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+
+          # macOS signing & notarization
           APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
           APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
           APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
+          APPLE_API_KEY_PATH: ${{ secrets.APPLE_API_KEY_PATH }}
+
+          # Fallback: Apple ID method (if API keys not set)
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+
+          # Windows signing
+          WINDOWS_CERTIFICATE: ${{ secrets.WINDOWS_CERTIFICATE }}
+          WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+
+          # Frontend environment variables (VITE_ prefix required)
+          VITE_APP_VERSION: ${{ github.ref_name }}
+          VITE_SUPABASE_URL: ${{ secrets.PRODUCTION_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.PRODUCTION_SUPABASE_ANON_KEY }}
           VITE_BETTER_AUTH_URL: ${{ secrets.NEXT_PUBLIC_APP_URL }}
-          VITE_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
         with:
           projectPath: apps/${{ github.event.inputs.app || (contains(github.ref, 'precision') && 'precision' || 'momentum') }}
+          args: ${{ matrix.args }}
           tagName: ${{ github.ref_name }}
           releaseName: ${{ github.event.inputs.app || (contains(github.ref, 'precision') && 'Precision' || 'Momentum') }} v${{ github.event.inputs.version || github.ref_name }}
           releaseBody: |
@@ -122,15 +145,20 @@ jobs:
             ## Installation
 
             - **macOS**: Download the `.dmg` file and drag to Applications
-            - **Windows**: Download the `.exe` or `.msi` installer
+            - **Windows**: Download the `.exe` installer (NSIS) or `.msi` (Windows Installer)
             - **Linux**: Download the `.AppImage`, `.deb`, or `.rpm` package
+
+            ## Auto-Updates
+
+            This version includes auto-update support. The app will check for updates automatically.
 
             ## Verification
 
             All releases are signed. You can verify signatures using the public key available in our repository.
           releaseDraft: false
-          prerelease: ${{ contains(github.ref_name, 'beta') || contains(github.ref_name, 'alpha') }}
+          prerelease: ${{ contains(github.ref_name, 'beta') || contains(github.ref_name, 'alpha') || contains(github.ref_name, 'rc') }}
           includeUpdaterJson: true
+          updaterJsonPreferNsis: true
 
   # ==============================================
   # Update Homebrew Formula (macOS)
