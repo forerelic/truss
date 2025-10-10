@@ -100,17 +100,14 @@ bun run format               # Format code with Prettier
 
 # Releases (Independent versioning)
 bun run release:manager      # Interactive release CLI
-bun run release:web          # Quick website release
 bun run release:precision    # Quick Precision release
 bun run release:momentum     # Quick Momentum release
 
-# Version Management
-bun run version:web:patch    # Bump website patch version
+# Version Management (Desktop Apps)
 bun run version:precision:minor  # Bump Precision minor version
 bun run version:momentum:major   # Bump Momentum major version
 
-# Changelog Generation
-bun run changelog:web        # Generate website changelog
+# Changelog Generation (Desktop Apps)
 bun run changelog:precision  # Generate Precision changelog
 bun run changelog:momentum   # Generate Momentum changelog
 
@@ -137,11 +134,11 @@ Each application is versioned and released independently:
 
 ### Release Workflows
 
-Each app has its own GitHub Actions workflow:
+Desktop apps use GitHub Actions workflows for building and releasing:
 
-- `.github/workflows/release-web.yml` - Website deployment
-- `.github/workflows/release-precision.yml` - Precision builds
-- `.github/workflows/release-momentum.yml` - Momentum builds
+- `.github/workflows/release-desktop.yml` - Desktop app builds (Precision & Momentum)
+
+Website deployment is handled automatically by Vercel's Git integration (no GitHub Actions needed).
 
 ### Creating Releases
 
@@ -203,14 +200,15 @@ import Image from "next/image";
 ### Website (`apps/web`)
 
 ```bash
-# Deployment
-VERCEL_TOKEN=xxx              # For Vercel deployment
+# Build environment
 NODE_ENV=production           # Build environment
 
 # Public variables
 NEXT_PUBLIC_APP_VERSION=1.0.0
 NEXT_PUBLIC_PRECISION_DOWNLOAD_URL=https://github.com/...
 NEXT_PUBLIC_MOMENTUM_DOWNLOAD_URL=https://github.com/...
+
+# Note: Vercel environment variables are configured in the Vercel dashboard
 ```
 
 ### Desktop Apps (`apps/precision`, `apps/momentum`)
@@ -227,12 +225,16 @@ VITE_AUTO_UPDATE_URL=https://...
 
 ## CI/CD Configuration
 
-### GitHub Secrets Required
+### Website Deployment
+
+The website uses **Vercel's automatic Git integration**:
+- Automatically deploys on every push to `main`
+- Preview deployments for all PRs
+- No GitHub Actions needed - configure in Vercel dashboard
+
+### GitHub Secrets Required (Desktop Apps)
 
 ```bash
-# Deployment
-VERCEL_TOKEN                # Website deployment
-
 # Code Signing (Optional)
 APPLE_SIGNING_CERTIFICATE   # macOS signing
 APPLE_SIGNING_PASSWORD      # Certificate password
@@ -246,10 +248,9 @@ TURBO_TEAM                  # Team identifier
 
 ### Workflow Triggers
 
-- **Push to main**: Website auto-deploys
-- **Tag push `web-v*`**: Website release
-- **Tag push `precision-v*`**: Precision release
-- **Tag push `momentum-v*`**: Momentum release
+- **Push to main**: Website auto-deploys via Vercel (no workflow)
+- **Tag push `precision-v*`**: Precision release build
+- **Tag push `momentum-v*`**: Momentum release build
 
 ## Development Guidelines
 
