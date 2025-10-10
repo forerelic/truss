@@ -155,7 +155,7 @@ jobs:
         run: |
           echo "### Migration Diff" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`sql" >> $GITHUB_STEP_SUMMARY
-          supabase db diff --password ${{ secrets.PRODUCTION_DB_PASSWORD }} >> $GITHUB_STEP_SUMMARY
+          supabase db diff --linked >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
 
       - name: Push migrations
