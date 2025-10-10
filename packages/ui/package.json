@@ -1,0 +1,46 @@
+{
+  "name": "@truss/ui",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    "./components/*": "./src/components/*.tsx",
+    "./hooks/*": "./src/hooks/*.ts",
+    "./views/auth-test-view": "./src/views/auth-test-view.tsx",
+    "./lib/utils": "./src/lib/utils.ts",
+    "./lib/supabase/client": "./src/lib/supabase/client.ts",
+    "./lib/supabase/server": "./src/lib/supabase/server.ts",
+    "./lib/supabase/types": "./src/lib/supabase/types.ts",
+    "./lib/auth/server": "./src/lib/auth/server.ts",
+    "./lib/auth/client": "./src/lib/auth/client.ts",
+    "./lib/auth/tauri-client": "./src/lib/auth/tauri-client.ts",
+    "./lib/organizations/types": "./src/lib/organizations/types.ts",
+    "./lib/organizations/utils": "./src/lib/organizations/utils.ts",
+    "./lib/organizations/permissions": "./src/lib/organizations/permissions.ts",
+    "./lib/organizations/workspace-context": "./src/lib/organizations/workspace-context.tsx",
+    "./globals.css": "./src/styles/globals.css",
+    "./styles/theme.css": "./src/styles/theme.css"
+  },
+  "scripts": {
+    "lint": "eslint . --max-warnings 0",
+    "generate:component": "turbo gen react-component",
+    "check-types": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@truss/eslint-config": "*",
+    "@truss/typescript-config": "*",
+    "@types/node": "^22.15.3",
+    "@types/react": "19.1.0",
+    "@types/react-dom": "19.1.1",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "eslint": "^9.34.0",
+    "tailwind-merge": "^3.3.1",
+    "typescript": "5.9.2"
+  },
+  "dependencies": {
+    "@radix-ui/react-slot": "^1.2.3",
+    "lucide-react": "^0.545.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "buildCommand": "turbo run build --filter=@truss/web",
+  "ignoreCommand": "npx turbo-ignore @truss/web",
+  "framework": null,
+  "outputDirectory": "apps/web/.next"
+}

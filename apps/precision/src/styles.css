@@ -1,0 +1,6 @@
+@import "tailwindcss";
+@source "../../../packages/ui/src/**/*.{ts,tsx}";
+@import "@truss/ui/styles/theme.css";
+
+/* (Optional) v4 plugin usage */
+@plugin "tailwindcss-animate";

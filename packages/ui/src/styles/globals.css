@@ -1,0 +1,5 @@
+/* Base Tailwind directives for shared UI package */
+@import "tailwindcss";
+
+/* Import the theme configuration */
+@import "./theme.css";

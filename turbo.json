@@ -1,0 +1,505 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "ui": "tui",
+  "cacheDir": ".turbo/cache",
+  "envMode": "loose",
+  "globalDependencies": [
+    ".env",
+    ".env.*",
+    "tsconfig.json",
+    "package.json",
+    "bun.lockb",
+    "turbo.json"
+  ],
+  "globalEnv": [
+    "NODE_ENV",
+    "CI",
+    "VERCEL",
+    "VERCEL_ENV",
+    "VERCEL_URL",
+    "VERCEL_BRANCH_URL",
+    "VERCEL_REGION",
+    "VERCEL_TEAM_ID",
+    "VERCEL_AUTOMATION_BYPASS_SECRET",
+    "DEPLOY_PRIME_URL"
+  ],
+  "globalPassThroughEnv": [
+    "SUPABASE_ACCESS_TOKEN",
+    "SUPABASE_SERVICE_ROLE_KEY",
+    "TURBO_TOKEN",
+    "TURBO_TEAM",
+    "TURBO_REMOTE_ONLY",
+    "STAGING_PROJECT_ID",
+    "PRODUCTION_PROJECT_ID"
+  ],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": [
+        ".next/**",
+        "!.next/cache/**",
+        "dist/**",
+        "src-tauri/target/release/**"
+      ],
+      "env": [
+        "NEXT_PUBLIC_*",
+        "VITE_*",
+        "DATABASE_URL",
+        "SUPABASE_DB_URL",
+        "GITHUB_CLIENT_ID",
+        "GITHUB_CLIENT_SECRET",
+        "GOOGLE_CLIENT_ID",
+        "GOOGLE_CLIENT_SECRET",
+        "BETTER_AUTH_SECRET",
+        "TAURI_SIGNING_PRIVATE_KEY",
+        "TAURI_SIGNING_PUBLIC_KEY"
+      ]
+    },
+    "lint": {
+      "dependsOn": ["^lint"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "**/*.ts",
+        "**/*.tsx",
+        "**/*.js",
+        "**/*.jsx",
+        "!node_modules/**",
+        "!.next/**",
+        "!dist/**"
+      ],
+      "outputs": []
+    },
+    "check-types": {
+      "dependsOn": ["^check-types"],
+      "inputs": [
+        "$TURBO_DEFAULT$",
+        "**/*.ts",
+        "**/*.tsx",
+        "**/*.d.ts",
+        "tsconfig.json",
+        "!node_modules/**",
+        "!.next/**",
+        "!dist/**"
+      ],
+      "outputs": []
+    },
+    "clean": {
+      "cache": false
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true,
+      "env": [
+        "NEXT_PUBLIC_*",
+        "VITE_*",
+        "DATABASE_URL",
+        "SUPABASE_DB_URL",
+        "GITHUB_CLIENT_ID",
+        "GITHUB_CLIENT_SECRET",
+        "GOOGLE_CLIENT_ID",
+        "GOOGLE_CLIENT_SECRET",
+        "BETTER_AUTH_SECRET"
+      ]
+    },
+    "dev:backend": {
+      "cache": false,
+      "persistent": true,
+      "env": [
+        "DATABASE_URL",
+        "SUPABASE_DB_URL",
+        "BETTER_AUTH_SECRET"
+      ]
+    },
+    "dev:vite": {
+      "cache": false,
+      "persistent": true,
+      "env": [
+        "VITE_*"
+      ]
+    },
+    "tauri": {
+      "cache": false,
+      "persistent": true,
+      "env": [
+        "TAURI_*",
+        "VITE_*"
+      ]
+    },
+    "tauri:build": {
+      "dependsOn": ["^build"],
+      "outputs": [
+        "src-tauri/target/release/**",
+        "src-tauri/target/debug/**"
+      ],
+      "env": [
+        "TAURI_SIGNING_PRIVATE_KEY",
+        "TAURI_SIGNING_PUBLIC_KEY",
+        "APPLE_SIGNING_CERTIFICATE",
+        "APPLE_SIGNING_PASSWORD",
+        "WINDOWS_SIGNING_CERTIFICATE",
+        "WINDOWS_SIGNING_PASSWORD"
+      ]
+    },
+    "tauri:dev": {
+      "cache": false,
+      "persistent": true,
+      "env": [
+        "TAURI_*",
+        "VITE_*"
+      ]
+    },
+    "shadcn": {
+      "cache": false,
+      "interactive": true
+    },
+    "db:generate": {
+      "cache": false,
+      "env": [
+        "SUPABASE_DB_URL",
+        "DATABASE_URL",
+        "NEXT_PUBLIC_SUPABASE_URL",
+        "SUPABASE_SERVICE_ROLE_KEY"
+      ],
+      "outputs": [
+        "packages/ui/src/lib/supabase/types.ts",
+        "**/database.types.ts"
+      ]
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "outputs": ["coverage/**"],
+      "env": [
+        "NODE_ENV",
+        "DATABASE_URL"
+      ]
+    },
+    "//#format": {
+      "cache": false,
+      "outputs": []
+    },
+    "//#format:check": {
+      "outputs": []
+    },
+    "//#cleanup-ports": {
+      "cache": false
+    },
+    "//#db:start": {
+      "cache": false,
+      "persistent": true,
+      "env": [
+        "SUPABASE_ACCESS_TOKEN"
+      ]
+    },
+    "//#db:stop": {
+      "cache": false
+    },
+    "//#db:studio": {
+      "cache": false,
+      "persistent": true,
+      "interactive": true
+    },
+    "//#db:status": {
+      "cache": false
+    },
+    "//#db:health": {
+      "cache": false
+    },
+    "//#db:reset": {
+      "cache": false,
+      "interactive": true
+    },
+    "//#db:push": {
+      "cache": false,
+      "env": [
+        "DATABASE_URL",
+        "SUPABASE_DB_URL"
+      ]
+    },
+    "//#db:push:force": {
+      "cache": false
+    },
+    "//#db:push:dry": {
+      "cache": false
+    },
+    "//#db:diff": {
+      "cache": false,
+      "env": [
+        "DATABASE_URL",
+        "SUPABASE_DB_URL"
+      ]
+    },
+    "//#db:validate": {
+      "cache": false
+    },
+    "//#db:migration:new": {
+      "cache": false,
+      "interactive": true
+    },
+    "//#db:migration:list": {
+      "cache": false
+    },
+    "//#db:pull": {
+      "cache": false,
+      "env": [
+        "DATABASE_URL",
+        "SUPABASE_DB_URL"
+      ]
+    },
+    "//#auth:generate": {
+      "cache": false,
+      "outputs": [
+        "supabase/migrations/**"
+      ]
+    },
+    "//#auth:test": {
+      "cache": false
+    },
+    "//#db:generate:local": {
+      "cache": false,
+      "env": [
+        "SUPABASE_DB_URL",
+        "DATABASE_URL"
+      ],
+      "outputs": [
+        "packages/ui/src/lib/supabase/types.ts"
+      ]
+    },
+    "//#db:generate:remote": {
+      "cache": false,
+      "env": [
+        "SUPABASE_DB_URL",
+        "DATABASE_URL"
+      ],
+      "outputs": [
+        "packages/ui/src/lib/supabase/types.ts"
+      ]
+    },
+    "//#env:validate": {
+      "cache": false
+    },
+    "//#env:validate:staging": {
+      "cache": false,
+      "env": [
+        "STAGING_PROJECT_ID"
+      ]
+    },
+    "//#env:validate:production": {
+      "cache": false,
+      "env": [
+        "PRODUCTION_PROJECT_ID"
+      ]
+    },
+    "//#supabase:link": {
+      "cache": false,
+      "interactive": true
+    },
+    "//#supabase:link:staging": {
+      "cache": false,
+      "env": [
+        "STAGING_PROJECT_ID"
+      ]
+    },
+    "//#supabase:link:production": {
+      "cache": false,
+      "env": [
+        "PRODUCTION_PROJECT_ID"
+      ]
+    },
+    "//#supabase:branches": {
+      "cache": false
+    },
+    "//#ci:test": {
+      "dependsOn": ["lint", "check-types", "//#format:check"],
+      "cache": false
+    },
+    "//#ci:build": {
+      "dependsOn": ["build"]
+    },
+    "//#precommit": {
+      "dependsOn": ["//#ci:test"]
+    },
+    "//#version:bump": {
+      "cache": false,
+      "interactive": true
+    },
+    "//#version:web:patch": {
+      "cache": false,
+      "outputs": [
+        "apps/web/package.json"
+      ]
+    },
+    "//#version:web:minor": {
+      "cache": false,
+      "outputs": [
+        "apps/web/package.json"
+      ]
+    },
+    "//#version:web:major": {
+      "cache": false,
+      "outputs": [
+        "apps/web/package.json"
+      ]
+    },
+    "//#version:web:prerelease": {
+      "cache": false,
+      "outputs": [
+        "apps/web/package.json"
+      ]
+    },
+    "//#version:precision:patch": {
+      "cache": false,
+      "outputs": [
+        "apps/precision/package.json"
+      ]
+    },
+    "//#version:precision:minor": {
+      "cache": false,
+      "outputs": [
+        "apps/precision/package.json"
+      ]
+    },
+    "//#version:precision:major": {
+      "cache": false,
+      "outputs": [
+        "apps/precision/package.json"
+      ]
+    },
+    "//#version:precision:prerelease": {
+      "cache": false,
+      "outputs": [
+        "apps/precision/package.json"
+      ]
+    },
+    "//#version:momentum:patch": {
+      "cache": false,
+      "outputs": [
+        "apps/momentum/package.json"
+      ]
+    },
+    "//#version:momentum:minor": {
+      "cache": false,
+      "outputs": [
+        "apps/momentum/package.json"
+      ]
+    },
+    "//#version:momentum:major": {
+      "cache": false,
+      "outputs": [
+        "apps/momentum/package.json"
+      ]
+    },
+    "//#version:momentum:prerelease": {
+      "cache": false,
+      "outputs": [
+        "apps/momentum/package.json"
+      ]
+    },
+    "//#changelog": {
+      "cache": false,
+      "interactive": true,
+      "outputs": [
+        "CHANGELOG.md"
+      ]
+    },
+    "//#changelog:web": {
+      "cache": false,
+      "outputs": [
+        "apps/web/CHANGELOG.md"
+      ]
+    },
+    "//#changelog:precision": {
+      "cache": false,
+      "outputs": [
+        "apps/precision/CHANGELOG.md"
+      ]
+    },
+    "//#changelog:momentum": {
+      "cache": false,
+      "outputs": [
+        "apps/momentum/CHANGELOG.md"
+      ]
+    },
+    "//#release:web": {
+      "cache": false,
+      "dependsOn": ["//#version:web:patch", "//#changelog:web"]
+    },
+    "//#release:precision": {
+      "cache": false,
+      "dependsOn": ["//#version:precision:patch", "//#changelog:precision"]
+    },
+    "//#release:momentum": {
+      "cache": false,
+      "dependsOn": ["//#version:momentum:patch", "//#changelog:momentum"]
+    },
+    "//#release:manager": {
+      "cache": false,
+      "interactive": true
+    },
+    "//#release:create": {
+      "cache": false,
+      "interactive": true
+    },
+    "//#changeset": {
+      "cache": false,
+      "interactive": true
+    },
+    "//#changeset:version": {
+      "cache": false,
+      "outputs": [
+        ".changeset/**",
+        "**/CHANGELOG.md",
+        "**/package.json"
+      ]
+    },
+    "//#changeset:publish": {
+      "cache": false
+    },
+    "@truss/web#build": {
+      "dependsOn": ["^build"],
+      "outputs": [
+        ".next/**",
+        "!.next/cache/**"
+      ],
+      "env": [
+        "NEXT_PUBLIC_*",
+        "GITHUB_CLIENT_ID",
+        "GITHUB_CLIENT_SECRET",
+        "GOOGLE_CLIENT_ID",
+        "GOOGLE_CLIENT_SECRET",
+        "BETTER_AUTH_SECRET",
+        "DATABASE_URL",
+        "SUPABASE_DB_URL"
+      ]
+    },
+    "@truss/precision#build": {
+      "dependsOn": ["^build"],
+      "outputs": [
+        "dist/**",
+        "src-tauri/target/release/**"
+      ],
+      "env": [
+        "VITE_*",
+        "TAURI_SIGNING_PRIVATE_KEY",
+        "TAURI_SIGNING_PUBLIC_KEY"
+      ]
+    },
+    "@truss/momentum#build": {
+      "dependsOn": ["^build"],
+      "outputs": [
+        "dist/**",
+        "src-tauri/target/release/**"
+      ],
+      "env": [
+        "VITE_*",
+        "TAURI_SIGNING_PRIVATE_KEY",
+        "TAURI_SIGNING_PUBLIC_KEY"
+      ]
+    },
+    "@truss/ui#build": {
+      "outputs": [],
+      "cache": true
+    }
+  },
+  "remoteCache": {}
+}
