@@ -8,7 +8,9 @@
       "@truss/ui/*": ["./src/*"]
     },
     "declaration": false,
-    "declarationMap": false
+    "declarationMap": false,
+    "module": "ESNext",
+    "moduleResolution": "Bundler"
   },
   "include": ["src"],
   "exclude": ["node_modules", "dist"]

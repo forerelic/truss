@@ -50,20 +50,18 @@ import type { auth } from "./server";
 // Get API base URL from environment
 const getBaseUrl = () => {
   // Production URL from environment variable
-  // @ts-expect-error - import.meta.env is Vite-specific
-  if (
-    typeof import.meta !== "undefined" &&
-    import.meta.env?.VITE_BETTER_AUTH_URL
-  ) {
-    // @ts-expect-error - import.meta.env is Vite-specific
-    return import.meta.env.VITE_BETTER_AUTH_URL;
-  }
+  // Check for Vite environment (used in Tauri apps)
+  if (typeof import.meta !== "undefined") {
+    const meta = import.meta as { env?: Record<string, string> };
+    if (meta.env?.VITE_BETTER_AUTH_URL) {
+      return meta.env.VITE_BETTER_AUTH_URL;
+    }
 
-  // Development: Connect to local Next.js server
-  // @ts-expect-error - import.meta.env is Vite-specific
-  if (typeof import.meta !== "undefined" && import.meta.env?.DEV) {
-    console.log("[TauriAuthClient] Using local development server");
-    return "http://localhost:3000";
+    // Development: Connect to local Next.js server
+    if (meta.env?.DEV) {
+      console.log("[TauriAuthClient] Using local development server");
+      return "http://localhost:3000";
+    }
   }
 
   // Production fallback - should be set via environment variable

@@ -17,18 +17,17 @@ export function getSupabaseClient() {
   // Get environment variables - supports both Next.js and Vite
   // Next.js uses process.env.NEXT_PUBLIC_*
   // Vite uses import.meta.env.VITE_*
-  // @ts-expect-error - import.meta.env is Vite-specific
-  const supabaseUrl =
-    process.env.NEXT_PUBLIC_SUPABASE_URL ||
-    // @ts-expect-error - import.meta.env is Vite-specific
-    (typeof import.meta !== "undefined" && import.meta.env?.VITE_SUPABASE_URL);
+  const meta =
+    typeof import.meta !== "undefined"
+      ? (import.meta as { env?: Record<string, string> })
+      : undefined;
 
-  // @ts-expect-error - import.meta.env is Vite-specific
+  const supabaseUrl =
+    process.env.NEXT_PUBLIC_SUPABASE_URL || meta?.env?.VITE_SUPABASE_URL;
+
   const supabaseAnonKey =
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
-    // @ts-expect-error - import.meta.env is Vite-specific
-    (typeof import.meta !== "undefined" &&
-      import.meta.env?.VITE_SUPABASE_ANON_KEY);
+    meta?.env?.VITE_SUPABASE_ANON_KEY;
 
   if (!supabaseUrl || !supabaseAnonKey) {
     throw new Error(

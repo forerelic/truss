@@ -5,13 +5,17 @@ import type {
   AppName,
   AppPermissionLevel,
   MemberWithPermissions,
+  OrganizationRole,
 } from "./types";
 
 // Database row types (until Better Auth migrations are run)
 interface AppPermissionRow {
+  id: string;
   memberId: string;
   app: string;
   permission: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface MemberRow {
@@ -156,7 +160,7 @@ export async function getOrganizationMembers(
     id: member.id,
     user_id: member.userId,
     organization_id: member.organizationId,
-    role: member.role,
+    role: member.role as OrganizationRole,
     created_at: member.createdAt,
     user: {
       id: member.user.id,
@@ -164,7 +168,17 @@ export async function getOrganizationMembers(
       email: member.user.email,
       image: member.user.image,
     },
-    app_permissions: permissions?.filter((p) => p.memberId === member.id) || [],
+    app_permissions:
+      permissions
+        ?.filter((p) => p.memberId === member.id)
+        .map((p) => ({
+          id: p.id,
+          member_id: p.memberId,
+          app: p.app as AppName,
+          permission: p.permission as AppPermissionLevel,
+          created_at: p.createdAt,
+          updated_at: p.updatedAt,
+        })) || [],
   }));
 }
 
