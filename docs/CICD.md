@@ -31,6 +31,7 @@ This document describes the complete CI/CD pipeline setup for the Truss monorepo
 **Trigger:** Pull requests, pushes to `main`/`develop`
 
 **Jobs:**
+
 - 🎯 **Quality Gate**: Linting, formatting, type checking
 - 🧪 **Tests**: Parallel test execution with sharding
 - 🏗️ **Build Matrix**: Builds all apps (web, precision, momentum)
@@ -38,6 +39,7 @@ This document describes the complete CI/CD pipeline setup for the Truss monorepo
 - ⚡ **Performance**: Lighthouse CI for web app
 
 **Features:**
+
 - Selective builds based on changed files
 - Turbo remote caching for speed
 - Parallel matrix builds
@@ -48,16 +50,19 @@ This document describes the complete CI/CD pipeline setup for the Truss monorepo
 **Trigger:** Changes to `supabase/**`, manual dispatch
 
 **Environments:**
+
 - Staging (on `develop` branch)
 - Production (on `main` branch)
 
 **Jobs:**
+
 - ✅ **Validate**: SQL syntax checking, migration testing
 - 🚀 **Deploy Staging**: Auto-deploy to staging Supabase
 - 🚀 **Deploy Production**: Manual approval for production
 - 💾 **Backup**: Automatic production backups
 
 **Safety Features:**
+
 - Migration validation on local Supabase
 - Diff preview before production deploy
 - Production reset protection
@@ -68,11 +73,13 @@ This document describes the complete CI/CD pipeline setup for the Truss monorepo
 **Trigger:** Push to `main` branch
 
 **Jobs:**
+
 - 📦 **Version & Release**: Automated versioning with Changesets
 - 🏷️ **Tag Sync**: Automatic git tag creation
 - 🚀 **Desktop Triggers**: Auto-trigger desktop app releases
 
 **Features:**
+
 - Independent versioning per app
 - Automatic changelog generation
 - GitHub releases with notes
@@ -83,10 +90,12 @@ This document describes the complete CI/CD pipeline setup for the Truss monorepo
 **Trigger:** Push to `main`, tags `web-v*`, manual dispatch
 
 **Environments:**
+
 - Staging (preview deployments)
 - Production (stable releases)
 
 **Jobs:**
+
 - 🏗️ **Build & Deploy**: Vercel deployment with environment config
 - 📊 **Lighthouse**: Performance testing
 - 💬 **PR Comments**: Deployment URL comments
@@ -96,11 +105,13 @@ This document describes the complete CI/CD pipeline setup for the Truss monorepo
 **Trigger:** Tags `precision-v*`, `momentum-v*`, manual dispatch
 
 **Platforms:**
+
 - macOS (universal binary)
 - Windows (x86_64)
 - Linux (x86_64)
 
 **Jobs:**
+
 - 🏗️ **Build Matrix**: Multi-platform builds
 - 🔐 **Code Signing**: Apple & Windows signing
 - 📦 **GitHub Release**: Installers & auto-updater JSON
@@ -113,11 +124,13 @@ This document describes the complete CI/CD pipeline setup for the Truss monorepo
 Add these secrets in: **Settings → Secrets and variables → Actions → New repository secret**
 
 #### **Turbo Remote Cache**
+
 ```bash
 TURBO_TOKEN=<your-turbo-token>
 ```
 
 #### **Vercel Deployment**
+
 ```bash
 VERCEL_TOKEN=<vercel-token>
 VERCEL_ORG_ID=<org-id>
@@ -125,18 +138,21 @@ VERCEL_PROJECT_ID=<project-id>
 ```
 
 #### **Supabase (Staging)**
+
 ```bash
 STAGING_PROJECT_ID=<staging-project-ref>
 STAGING_DB_PASSWORD=<staging-db-password>
 ```
 
 #### **Supabase (Production)**
+
 ```bash
 PRODUCTION_PROJECT_ID=<production-project-ref>
 PRODUCTION_DB_PASSWORD=<production-db-password>
 ```
 
 #### **Application Environment Variables**
+
 ```bash
 # Backend
 NEXT_PUBLIC_APP_URL=<app-url>
@@ -149,6 +165,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=<supabase-anon-key>
 ```
 
 #### **Desktop App Signing (Optional)**
+
 ```bash
 # macOS
 APPLE_CERTIFICATE=<base64-encoded-p12>
@@ -168,6 +185,7 @@ TAURI_SIGNING_PUBLIC_KEY=<public-key>
 ```
 
 #### **Notifications (Optional)**
+
 ```bash
 SLACK_WEBHOOK_URL=<webhook-url>
 DISCORD_WEBHOOK=<webhook-url>
@@ -186,6 +204,7 @@ TURBO_TEAM=<your-team-slug>
 ### Web App Deployment
 
 #### Staging
+
 ```bash
 # Automatic on push to main
 git push origin main
@@ -195,6 +214,7 @@ gh workflow run release-web.yml -f environment=staging
 ```
 
 #### Production
+
 ```bash
 # Manual dispatch with production environment
 gh workflow run release-web.yml -f environment=production
@@ -203,6 +223,7 @@ gh workflow run release-web.yml -f environment=production
 ### Desktop App Releases
 
 #### Using Changesets (Recommended)
+
 ```bash
 # 1. Add changeset
 bunx changeset add
@@ -217,6 +238,7 @@ git push
 ```
 
 #### Manual Release
+
 ```bash
 # 1. Tag release
 git tag -a precision-v1.0.0 -m "Release Precision v1.0.0"
@@ -227,6 +249,7 @@ git push origin precision-v1.0.0
 ```
 
 #### Manual Dispatch
+
 ```bash
 # Trigger specific app release
 gh workflow run release-desktop.yml \
@@ -237,6 +260,7 @@ gh workflow run release-desktop.yml \
 ### Database Migrations
 
 #### Staging (Automatic)
+
 ```bash
 # Push to develop branch
 git checkout develop
@@ -248,6 +272,7 @@ git push origin develop
 ```
 
 #### Production (Manual Approval)
+
 ```bash
 # Push to main branch
 git checkout main
@@ -259,6 +284,7 @@ git push origin main
 ```
 
 #### Manual Migration
+
 ```bash
 # Manual dispatch with specific action
 gh workflow run database.yml \
@@ -314,26 +340,34 @@ Add to README.md:
 ### Common Issues
 
 #### **CI Fails: "TURBO_TOKEN not set"**
+
 **Solution:** Add `TURBO_TOKEN` to repository secrets
 
 #### **Vercel Deployment Fails**
+
 **Solution:**
+
 1. Verify `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID` are set
 2. Check Vercel project is linked correctly
 3. Verify deployment quota not exceeded
 
 #### **Desktop Build Fails: "Rust toolchain not found"**
+
 **Solution:** Ensure `dtolnay/rust-toolchain@stable` action is running
 
 #### **Database Migration Fails**
+
 **Solution:**
+
 1. Check migration SQL syntax
 2. Verify Supabase credentials
 3. Review migration validation logs
 4. Ensure local Supabase is running for tests
 
 #### **Changesets Not Creating PR**
+
 **Solution:**
+
 1. Ensure changesets exist in `.changeset/` directory
 2. Verify `GITHUB_TOKEN` has write permissions
 3. Check branch protection allows bot PRs
@@ -351,22 +385,26 @@ ACTIONS_STEP_DEBUG: true
 ## 🎯 Best Practices
 
 ### Commits
+
 - Use conventional commits: `feat:`, `fix:`, `chore:`
 - Keep commits atomic and focused
 - Reference issues: `fix: resolve #123`
 
 ### Changesets
+
 - Add changeset for every user-facing change
 - Choose correct semver bump (major/minor/patch)
 - Write clear changelog descriptions
 
 ### Releases
+
 - Use semantic versioning (semver)
 - Test staging before production
 - Monitor deployment in GitHub Actions
 - Verify builds in GitHub Releases
 
 ### Security
+
 - Rotate secrets regularly
 - Use least-privilege access
 - Review Dependabot PRs promptly

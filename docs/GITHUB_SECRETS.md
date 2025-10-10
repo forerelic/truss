@@ -16,11 +16,13 @@ This guide provides step-by-step instructions for configuring all required secre
 ## ✅ Quick Setup Checklist
 
 ### Essential (Required for CI/CD)
+
 - [ ] `TURBO_TOKEN` - Turborepo remote caching
 - [ ] `TURBO_TEAM` - Turborepo team (variable)
 - [ ] `GITHUB_TOKEN` - Auto-provided by GitHub
 
 ### Web Deployment (Required for Vercel)
+
 - [ ] `VERCEL_TOKEN` - Vercel authentication
 - [ ] `VERCEL_ORG_ID` - Vercel organization ID
 - [ ] `VERCEL_PROJECT_ID` - Vercel project ID
@@ -29,24 +31,29 @@ This guide provides step-by-step instructions for configuring all required secre
 - [ ] `DATABASE_URL` - PostgreSQL connection
 
 ### Supabase (Required for database)
+
 - [ ] `NEXT_PUBLIC_SUPABASE_URL` - Supabase project URL
 - [ ] `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Supabase anon key
 - [ ] `SUPABASE_ACCESS_TOKEN` - Supabase management token
 
 ### Staging Environment
+
 - [ ] `STAGING_PROJECT_ID` - Staging Supabase project ref
 - [ ] `STAGING_DB_PASSWORD` - Staging database password
 
 ### Production Environment
+
 - [ ] `PRODUCTION_PROJECT_ID` - Production Supabase project ref
 - [ ] `PRODUCTION_DB_PASSWORD` - Production database password
 
 ### Desktop Apps (Optional - for signing)
+
 - [ ] Apple signing certificates
 - [ ] Windows signing certificates
 - [ ] Tauri update signing keys
 
 ### Notifications (Optional)
+
 - [ ] `SLACK_WEBHOOK_URL` - Slack notifications
 - [ ] `DISCORD_WEBHOOK` - Discord notifications
 
@@ -55,6 +62,7 @@ This guide provides step-by-step instructions for configuring all required secre
 ### Turborepo Remote Cache
 
 **TURBO_TOKEN**
+
 ```bash
 # Get from: https://vercel.com/account/tokens
 # Scope: Full Account
@@ -66,6 +74,7 @@ Required for: CI, builds, deployments
 ### Vercel Deployment
 
 **VERCEL_TOKEN**
+
 ```bash
 # Get from: https://vercel.com/account/tokens
 # Scope: Full Account
@@ -75,6 +84,7 @@ Required for: Web deployments
 ```
 
 **VERCEL_ORG_ID**
+
 ```bash
 # Find in: Vercel project settings → General
 # Format: team_xxxxxxxxxxxxxxxxxxxxx
@@ -84,6 +94,7 @@ Required for: Web deployments
 ```
 
 **VERCEL_PROJECT_ID**
+
 ```bash
 # Find in: Vercel project settings → General
 # Format: prj_xxxxxxxxxxxxxxxxxxxxx
@@ -95,6 +106,7 @@ Required for: Web deployments
 ### Application Configuration
 
 **NEXT_PUBLIC_APP_URL**
+
 ```bash
 # Development: http://localhost:3000
 # Staging: https://staging.truss.app
@@ -105,6 +117,7 @@ Required for: All deployments
 ```
 
 **BETTER_AUTH_SECRET**
+
 ```bash
 # Generate with: openssl rand -base64 32
 
@@ -114,6 +127,7 @@ Security: Must be 32+ characters, keep secret
 ```
 
 **DATABASE_URL**
+
 ```bash
 # Format: postgresql://postgres:[PASSWORD]@[HOST]:[PORT]/postgres
 # Example: postgresql://postgres:password@db.xxx.supabase.co:5432/postgres
@@ -126,6 +140,7 @@ Security: Contains password, keep secret
 ### Supabase Configuration
 
 **NEXT_PUBLIC_SUPABASE_URL**
+
 ```bash
 # Get from: Supabase project settings → API
 # Format: https://xxxxxxxxxxxxx.supabase.co
@@ -135,6 +150,7 @@ Required for: Database and auth
 ```
 
 **NEXT_PUBLIC_SUPABASE_ANON_KEY**
+
 ```bash
 # Get from: Supabase project settings → API → anon/public key
 
@@ -144,6 +160,7 @@ Security: Safe to expose in client (has RLS protection)
 ```
 
 **SUPABASE_ACCESS_TOKEN**
+
 ```bash
 # Get from: https://supabase.com/dashboard/account/tokens
 # Create: "New access token" with management permissions
@@ -158,6 +175,7 @@ Security: Keep secret, has full project access
 ### Staging Environment
 
 **STAGING_PROJECT_ID**
+
 ```bash
 # Get from: Supabase staging project settings → General
 # Format: abcdefghijklmnop
@@ -167,6 +185,7 @@ Required for: Staging database deployments
 ```
 
 **STAGING_DB_PASSWORD**
+
 ```bash
 # Get from: Supabase staging project → Database → Connection string
 
@@ -178,6 +197,7 @@ Security: Keep secret
 ### Production Environment
 
 **PRODUCTION_PROJECT_ID**
+
 ```bash
 # Get from: Supabase production project settings → General
 # Format: abcdefghijklmnop
@@ -187,6 +207,7 @@ Required for: Production database deployments
 ```
 
 **PRODUCTION_DB_PASSWORD**
+
 ```bash
 # Get from: Supabase production project → Database → Connection string
 
@@ -198,6 +219,7 @@ Security: Keep secret, use strong password
 ## 🍎 macOS Code Signing (Optional)
 
 **APPLE_CERTIFICATE**
+
 ```bash
 # Generate: Export Developer ID certificate from Keychain
 # Format: Base64-encoded .p12 file
@@ -212,6 +234,7 @@ Required for: Production macOS releases
 ```
 
 **APPLE_CERTIFICATE_PASSWORD**
+
 ```bash
 # The password used when exporting the .p12 file
 
@@ -221,6 +244,7 @@ Security: Keep secret
 ```
 
 **APPLE_SIGNING_IDENTITY**
+
 ```bash
 # Format: "Developer ID Application: Your Name (TEAM_ID)"
 # Get from: security find-identity -v -p codesigning
@@ -230,6 +254,7 @@ Required for: macOS code signing
 ```
 
 **APPLE_ID** & **APPLE_PASSWORD**
+
 ```bash
 # APPLE_ID: Your Apple Developer account email
 # APPLE_PASSWORD: App-specific password from appleid.apple.com
@@ -240,6 +265,7 @@ Security: Use app-specific password, not account password
 ```
 
 **APPLE_TEAM_ID**
+
 ```bash
 # Get from: Apple Developer Account → Membership
 # Format: 10-character alphanumeric (e.g., ABCDE12345)
@@ -251,6 +277,7 @@ Required for: macOS signing and notarization
 ## 🪟 Windows Code Signing (Optional)
 
 **WINDOWS_SIGNING_CERTIFICATE**
+
 ```bash
 # Format: Base64-encoded .pfx file
 
@@ -262,6 +289,7 @@ Required for: Production Windows releases
 ```
 
 **WINDOWS_SIGNING_PASSWORD**
+
 ```bash
 # The password for the .pfx certificate
 
@@ -273,6 +301,7 @@ Security: Keep secret
 ## 🔄 Tauri Auto-Updater (Optional)
 
 **TAURI_SIGNING_PRIVATE_KEY**
+
 ```bash
 # Generate: bunx tauri signer generate
 # Use: Private key output
@@ -283,6 +312,7 @@ Security: Keep secret, never commit
 ```
 
 **TAURI_SIGNING_PUBLIC_KEY**
+
 ```bash
 # Generate: bunx tauri signer generate
 # Use: Public key output
@@ -295,6 +325,7 @@ Security: Include in app code (tauri.conf.json)
 ## 📢 Notifications (Optional)
 
 **SLACK_WEBHOOK_URL**
+
 ```bash
 # Get from: Slack → Apps → Incoming Webhooks
 # Format: https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXX
@@ -304,6 +335,7 @@ Required for: Slack notifications
 ```
 
 **DISCORD_WEBHOOK**
+
 ```bash
 # Get from: Discord → Server Settings → Integrations → Webhooks
 # Format: https://discord.com/api/webhooks/000000000/XXXXXXXXXXXX

@@ -5,22 +5,26 @@ This document summarizes the cleanup performed to align our authentication setup
 ## Changes Made
 
 ### 1. Removed Unnecessary Files
+
 - **Deleted**: `packages/ui/src/lib/auth/tauri-storage.ts`
   - Custom storage adapter was not needed
   - The `@daveyplate/better-auth-tauri` plugin handles session persistence via cookies
 
 ### 2. Simplified Configuration
+
 - **Updated**: `packages/ui/src/lib/auth/tauri-client.ts`
   - Removed custom storage adapter
   - Now relies on Better Auth's built-in cookie management
   - Cleaner, official approach
 
 ### 3. Cleaned Up Dependencies
+
 - **Removed**: `@tauri-apps/plugin-store` from Precision app
   - No longer needed without custom storage
   - Reduces bundle size and complexity
 
 ### 4. Updated App Components
+
 - **Simplified**: Both `apps/precision/src/App.tsx` and `apps/momentum/src/App.tsx`
   - Removed unnecessary `useRef` wrapper
   - The `useBetterAuthTauri` hook handles initialization internally
@@ -28,6 +32,7 @@ This document summarizes the cleanup performed to align our authentication setup
 ## Current Architecture (Clean & Official)
 
 ### Server Side (`packages/ui/src/lib/auth/server.ts`)
+
 ```typescript
 import { tauri } from "@daveyplate/better-auth-tauri/plugin";
 
@@ -46,6 +51,7 @@ export const auth = betterAuth({
 ```
 
 ### Client Side (`packages/ui/src/lib/auth/tauri-client.ts`)
+
 ```typescript
 export const tauriAuthClient = createAuthClient({
   baseURL: getBaseUrl(),
@@ -60,6 +66,7 @@ export const tauriAuthClient = createAuthClient({
 ```
 
 ### Tauri App Usage (`apps/[precision|momentum]/src/App.tsx`)
+
 ```typescript
 useBetterAuthTauri({
   authClient: tauriAuthClient,
@@ -92,6 +99,7 @@ useBetterAuthTauri({
 ## Required Tauri Plugins
 
 According to the official documentation, these Tauri plugins are required:
+
 - `@tauri-apps/plugin-deep-link` - For OAuth callbacks
 - `@tauri-apps/plugin-http` - For HTTP requests with cookie support
 - `@tauri-apps/plugin-os` - For OS detection

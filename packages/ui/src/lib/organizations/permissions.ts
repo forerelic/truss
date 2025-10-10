@@ -164,8 +164,7 @@ export async function getOrganizationMembers(
       email: member.user.email,
       image: member.user.image,
     },
-    app_permissions:
-      permissions?.filter((p) => p.memberId === member.id) || [],
+    app_permissions: permissions?.filter((p) => p.memberId === member.id) || [],
   }));
 }
 
