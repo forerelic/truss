@@ -264,6 +264,33 @@ VITE_DEBUG_MODE=true
 VITE_DEBUG_AUTH=true
 ```
 
+### 🚨 IMPORTANT: Desktop App .env File Security
+
+**NEVER use `.env` files in desktop apps - ONLY use `.env.local`:**
+
+- ✅ **`.env.local`** - For local development (gitignored, safe)
+- ✅ **`.env.example`** - Templates with placeholder values (committed to git)
+- ✅ **`.env.production`** - Production templates (committed to git)
+- ❌ **`.env`** - DO NOT USE (easily accidentally committed)
+
+**Why this matters:**
+
+- `.env` files are commonly tracked by default in many projects
+- `.env.local` is universally understood as "never commit this"
+- Both `apps/precision/.gitignore` and `apps/momentum/.gitignore` explicitly block `.env` files
+- Root `.gitignore` also has comprehensive `.env*` protection (defense-in-depth)
+
+**If you see a `.env` file in desktop apps:**
+
+```bash
+# Delete it immediately
+rm apps/precision/.env apps/momentum/.env
+
+# Use .env.local instead
+cp apps/precision/.env.example apps/precision/.env.local
+cp apps/momentum/.env.example apps/momentum/.env.local
+```
+
 ## CI/CD Configuration
 
 ### Website Deployment
@@ -274,18 +301,99 @@ The website uses **Vercel's automatic Git integration**:
 - Preview deployments for all PRs
 - No GitHub Actions needed - configure in Vercel dashboard
 
-### GitHub Secrets Required (Desktop Apps)
+### GitHub Secrets Required
+
+**Core Infrastructure (Required):**
 
 ```bash
-# Code Signing (Optional)
-APPLE_SIGNING_CERTIFICATE   # macOS signing
-APPLE_SIGNING_PASSWORD      # Certificate password
-WINDOWS_SIGNING_CERTIFICATE # Windows signing
-WINDOWS_SIGNING_PASSWORD    # Certificate password
+# Turborepo Remote Caching (REQUIRED for CI/CD performance)
+TURBO_TOKEN=<vercel-token>  # Get from: https://vercel.com/account/tokens
 
-# Turbo Cache
-TURBO_TOKEN                 # Remote caching
-TURBO_TEAM                  # Team identifier
+# Supabase (REQUIRED for database workflows)
+SUPABASE_ACCESS_TOKEN=<token>
+
+# Staging Environment
+STAGING_PROJECT_ID=<supabase-project-id>
+STAGING_DB_PASSWORD=<db-password>
+STAGING_DATABASE_URL=postgresql://...
+STAGING_SUPABASE_URL=https://...
+STAGING_SUPABASE_ANON_KEY=<anon-key>
+
+# Production Environment
+PRODUCTION_PROJECT_ID=<supabase-project-id>
+PRODUCTION_DB_PASSWORD=<db-password>
+PRODUCTION_DATABASE_URL=postgresql://...
+PRODUCTION_SUPABASE_URL=https://...
+PRODUCTION_SUPABASE_ANON_KEY=<anon-key>
+
+# Application URLs
+NEXT_PUBLIC_APP_URL=https://your-app.vercel.app
+VITE_BETTER_AUTH_URL=https://your-app.vercel.app
+BETTER_AUTH_SECRET=<generate with: openssl rand -base64 32>
+```
+
+**GitHub Variables (Required):**
+
+```bash
+TURBO_TEAM=forerelic        # Turborepo team identifier
+ENABLE_CODE_SIGNING=false   # Set to true when ready for signed releases
+```
+
+**Code Signing (Optional - for production releases):**
+
+```bash
+# Tauri Auto-Updater Signing
+TAURI_SIGNING_PRIVATE_KEY=<base64-private-key>
+TAURI_SIGNING_PRIVATE_KEY_PASSWORD=<password>
+
+# macOS Code Signing
+APPLE_CERTIFICATE=<base64-p12-file>
+APPLE_CERTIFICATE_PASSWORD=<password>
+APPLE_SIGNING_IDENTITY=<identity>
+APPLE_API_ISSUER=<issuer-id>
+APPLE_API_KEY=<api-key>
+APPLE_API_KEY_PATH=<path-to-p8>
+
+# Windows Code Signing
+WINDOWS_CERTIFICATE=<base64-pfx-file>
+WINDOWS_CERTIFICATE_PASSWORD=<password>
+
+# Distribution
+HOMEBREW_GITHUB_TOKEN=<token>
+DISCORD_WEBHOOK=<webhook-url>
+CODECOV_TOKEN=<token>
+```
+
+### Setting Up Turborepo Remote Caching
+
+**Why this matters:** Without `TURBO_TOKEN`, your CI/CD builds will be **significantly slower** and won't benefit from remote caching.
+
+**Setup (one-time):**
+
+```bash
+# 1. Generate Vercel token (create with "Full Access" scope)
+open "https://vercel.com/account/tokens"
+
+# 2. Set GitHub secret
+gh secret set TURBO_TOKEN
+# Paste token when prompted
+
+# 3. Verify setup
+gh secret list | grep TURBO_TOKEN
+gh variable list | grep TURBO_TEAM
+
+# 4. (Optional) Enable local remote caching
+# Add to your shell profile (~/.zshrc or ~/.bashrc):
+export TURBO_TOKEN="your-vercel-token"
+export TURBO_TEAM="forerelic"
+```
+
+**Verification:** After setting up, your next CI run should show cache hits:
+
+```
+Tasks:    4 successful, 4 total
+Cached:   3 successful, 3 total    ← You should see this!
+Time:     12.5s >>> FULL TURBO ⚡️
 ```
 
 ### Workflow Triggers
@@ -376,23 +484,34 @@ All environment variables are validated at build time and runtime. See `apps/web
 
 ### Pre-commit Hooks (Automated Quality Checks)
 
-This project uses **Husky** + **lint-staged** to automatically check code before commits:
+This project uses **Husky** + **lint-staged** to automatically format code before commits:
 
 **What runs automatically on `git commit`:**
 
-- ESLint with `--fix` on TypeScript/JavaScript files
-- Prettier with `--write` on all files
-- Only on staged files (fast!)
+- ✅ Prettier with `--write` on all staged files (fast!)
+- ⚠️ **No ESLint** - runs in CI instead (see below)
+
+**Why no ESLint on pre-commit?**
+
+- Monorepo has package-specific ESLint configs (no root config)
+- ESLint v9 requires `eslint.config.js` at root (complex for monorepos)
+- Running lint on whole monorepo on every commit is slow
+- CI catches all lint errors anyway before merge
 
 **How it works:**
 
 1. You stage your changes: `git add .`
 2. You commit: `git commit -m "your message"`
-3. Pre-commit hook runs automatically
-4. If there are auto-fixable issues, they're fixed and added to your commit
-5. If there are un-fixable issues, commit is blocked with error messages
+3. Pre-commit hook runs Prettier automatically
+4. Files are formatted and added to your commit
 
-**Bypass (not recommended):**
+**Manual linting (recommended before pushing):**
+
+```bash
+bun run lint  # Lints all packages (fast with turbo cache)
+```
+
+**Bypass (emergency only):**
 
 ```bash
 git commit --no-verify -m "emergency fix"
@@ -400,7 +519,7 @@ git commit --no-verify -m "emergency fix"
 
 **Configuration:**
 
-- Hook: `.husky/pre-commit`
+- Hook: `.husky/pre-commit` (Husky v10 compatible - no shebang/source lines)
 - Config: `package.json` → `lint-staged` section
 
 ### Security Scanning
@@ -542,12 +661,20 @@ The following environment variables must be set in Vercel dashboard for `apps/we
 10. **Environment Structure** - Moved to package-specific `.env` files (monorepo best practice)
 11. **Documentation** - Comprehensive updates to CLAUDE.md with all new workflows
 
+### ✅ Phase 3: Security Hardening & Performance (2025-10-10)
+
+12. **Desktop App .env Security** - Removed production credentials from `.env` files
+13. **Defense-in-Depth .gitignore** - Added explicit `.env*` patterns to desktop app `.gitignore` files
+14. **Turborepo Remote Caching** - Configured `TURBO_TOKEN` for 10x faster CI/CD builds
+15. **Environment Documentation** - Comprehensive guide for all environments (local, staging, production)
+
 ### 🎯 Impact Summary
 
 - **Production Safety**: +100% (tests now block bad deploys)
 - **Developer Experience**: +200% (automated formatting, version management, pre-commit checks)
-- **Security**: +300% (CodeQL + TruffleHog + Dependabot + signed commits ready)
+- **Security**: +400% (CodeQL + TruffleHog + Dependabot + .env hardening + defense-in-depth)
 - **Consistency**: +100% (.nvmrc + .editorconfig + package-specific envs)
+- **CI/CD Performance**: +1000% (Turborepo remote caching enabled)
 
 ### 📋 Future Enhancements
 

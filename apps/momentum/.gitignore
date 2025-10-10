@@ -12,6 +12,13 @@ dist
 dist-ssr
 *.local
 
+# Environment Variables (defense-in-depth)
+# Root .gitignore also has these patterns, but we add them here for extra protection
+.env
+.env.*
+!.env.example
+!.env.production.example
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
