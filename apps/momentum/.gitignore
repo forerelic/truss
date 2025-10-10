@@ -14,10 +14,10 @@ dist-ssr
 
 # Environment Variables (defense-in-depth)
 # Root .gitignore also has these patterns, but we add them here for extra protection
-.env
-.env.*
+.env*
+# Allow committed .example templates only
 !.env.example
-!.env.production.example
+!.env*.example
 
 # Editor directories and files
 .vscode/*

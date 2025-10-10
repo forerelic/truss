@@ -17,6 +17,14 @@ on:
       version:
         description: "Version (e.g., 1.0.0)"
         required: true
+      environment:
+        description: "Target environment"
+        type: choice
+        required: true
+        default: "production"
+        options:
+          - production
+          - staging
 
 permissions:
   contents: write
@@ -167,9 +175,10 @@ jobs:
 
           # Frontend environment variables (VITE_ prefix required)
           VITE_APP_VERSION: ${{ github.ref_name }}
-          VITE_SUPABASE_URL: ${{ secrets.PRODUCTION_SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ secrets.PRODUCTION_SUPABASE_ANON_KEY }}
-          VITE_BETTER_AUTH_URL: ${{ secrets.NEXT_PUBLIC_APP_URL }}
+          # Use staging or production based on environment input (defaults to production for tag pushes)
+          VITE_SUPABASE_URL: ${{ github.event.inputs.environment == 'staging' && secrets.STAGING_SUPABASE_URL || secrets.PRODUCTION_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ github.event.inputs.environment == 'staging' && secrets.STAGING_SUPABASE_ANON_KEY || secrets.PRODUCTION_SUPABASE_ANON_KEY }}
+          VITE_BETTER_AUTH_URL: ${{ github.event.inputs.environment == 'staging' && secrets.STAGING_WEB_URL || secrets.NEXT_PUBLIC_APP_URL }}
         with:
           projectPath: apps/${{ needs.setup.outputs.app }}
           args: ${{ matrix.args }}
