@@ -6,6 +6,12 @@ import { Button } from "../components/button";
 import { Input } from "../components/input";
 import { Card } from "../components/card";
 
+// Better Auth member type
+interface BetterAuthMember {
+  userId: string;
+  role: string;
+}
+
 export function AuthTestView() {
   const { data: session } = authClient.useSession();
   const { data: activeOrg } = authClient.useActiveOrganization();
@@ -169,8 +175,9 @@ export function AuthTestView() {
           </p>
           <p>
             <strong>Your Role:</strong>{" "}
-            {activeOrg.members?.find((m: any) => m.userId === session.user.id)
-              ?.role || "N/A"}
+            {activeOrg.members?.find(
+              (m: BetterAuthMember) => m.userId === session.user.id,
+            )?.role || "N/A"}
           </p>
         </Card>
       )}

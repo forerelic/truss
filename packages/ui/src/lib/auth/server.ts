@@ -175,7 +175,7 @@ export const auth = betterAuth({
       },
 
       // Create a personal organization for new users
-      async onUserSignUp(_user: any) {
+      async onUserSignUp() {
         // Personal organizations can be created manually if needed
         // For now, users can create orgs as needed
       },

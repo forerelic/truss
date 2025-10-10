@@ -94,7 +94,7 @@ export interface Organization {
   name: string;
   slug: string;
   logo?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   created_at: string;
 
   // Email domain auto-join (like Notion, Slack)

@@ -7,6 +7,27 @@ import type {
   MemberWithPermissions,
 } from "./types";
 
+// Database row types (until Better Auth migrations are run)
+interface AppPermissionRow {
+  memberId: string;
+  app: string;
+  permission: string;
+}
+
+interface MemberRow {
+  id: string;
+  userId: string;
+  organizationId: string;
+  role: string;
+  createdAt: string;
+  user: {
+    id: string;
+    name: string;
+    email: string;
+    image?: string;
+  };
+}
+
 /**
  * Get app permissions for a member in an organization
  */
@@ -16,10 +37,11 @@ export async function getMemberAppPermissions(
   const supabase = getSupabaseClient();
 
   // Note: app_permissions table will exist after running migrations
-  const { data, error } = await (supabase as any)
+  const { data, error } = await supabase
     .from("app_permissions")
     .select("app, permission")
-    .eq("memberId", memberId);
+    .eq("memberId", memberId)
+    .returns<AppPermissionRow[]>();
 
   if (error) {
     console.error("Error fetching app permissions:", error);
@@ -32,7 +54,7 @@ export async function getMemberAppPermissions(
     momentum: "none" as AppPermissionLevel,
   };
 
-  data?.forEach((perm: any) => {
+  data?.forEach((perm) => {
     if (perm.app === "precision")
       permissions.precision = perm.permission as AppPermissionLevel;
     if (perm.app === "momentum")
@@ -55,7 +77,7 @@ export async function setMemberAppPermission(
 
   try {
     // Note: app_permissions table will exist after running migrations
-    const { error } = await (supabase as any).from("app_permissions").upsert(
+    const { error } = await supabase.from("app_permissions").upsert(
       {
         memberId,
         app,
@@ -91,7 +113,7 @@ export async function getOrganizationMembers(
 
   // First get members with user info
   // Note: member table will exist after running Better Auth migrations
-  const { data: members, error: membersError } = await (supabase as any)
+  const { data: members, error: membersError } = await supabase
     .from("member")
     .select(
       `
@@ -108,7 +130,8 @@ export async function getOrganizationMembers(
       )
     `,
     )
-    .eq("organizationId", organizationId);
+    .eq("organizationId", organizationId)
+    .returns<MemberRow[]>();
 
   if (membersError || !members) {
     console.error("Error fetching members:", membersError);
@@ -116,19 +139,20 @@ export async function getOrganizationMembers(
   }
 
   // Then get app permissions for all members
-  const memberIds = members.map((m: any) => m.id);
+  const memberIds = members.map((m) => m.id);
   // Note: app_permissions table will exist after running migrations
-  const { data: permissions, error: permsError } = await (supabase as any)
+  const { data: permissions, error: permsError } = await supabase
     .from("app_permissions")
     .select("*")
-    .in("memberId", memberIds);
+    .in("memberId", memberIds)
+    .returns<AppPermissionRow[]>();
 
   if (permsError) {
     console.error("Error fetching permissions:", permsError);
   }
 
   // Combine members with their permissions
-  return members.map((member: any) => ({
+  return members.map((member) => ({
     id: member.id,
     user_id: member.userId,
     organization_id: member.organizationId,
@@ -141,7 +165,7 @@ export async function getOrganizationMembers(
       image: member.user.image,
     },
     app_permissions:
-      permissions?.filter((p: any) => p.memberId === member.id) || [],
+      permissions?.filter((p) => p.memberId === member.id) || [],
   }));
 }
 
@@ -158,15 +182,12 @@ export async function checkUserAppPermission(
   const supabase = getSupabaseClient();
 
   // Note: user_has_app_permission function will exist after running migrations
-  const { data, error } = await (supabase as any).rpc(
-    "user_has_app_permission",
-    {
-      check_user_id: userId,
-      check_org_id: organizationId,
-      app_to_check: app,
-      required_permission: requiredPermission,
-    },
-  );
+  const { data, error } = await supabase.rpc("user_has_app_permission", {
+    check_user_id: userId,
+    check_org_id: organizationId,
+    app_to_check: app,
+    required_permission: requiredPermission,
+  });
 
   if (error) {
     console.error("Error checking permission:", error);

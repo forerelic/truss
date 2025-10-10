@@ -19,6 +19,22 @@ import type {
   OrganizationRole,
 } from "./types";
 
+// Better Auth organization types (until proper types are exported)
+interface BetterAuthMember {
+  id: string;
+  userId: string;
+  role: string;
+}
+
+interface BetterAuthOrganization {
+  id: string;
+  name: string;
+  slug: string;
+  members?: BetterAuthMember[];
+  allowedDomains?: string[] | null;
+  autoJoinEnabled?: boolean;
+}
+
 interface WorkspaceContextValue {
   // Current workspace
   workspace: WorkspaceContext | null;
@@ -97,8 +113,9 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
 
       // Organization workspace
       // Get member info to retrieve permissions
-      const member = activeOrg.members?.find(
-        (m: any) => m.userId === session.user.id,
+      const betterAuthOrg = activeOrg as unknown as BetterAuthOrganization;
+      const member = betterAuthOrg.members?.find(
+        (m) => m.userId === session.user.id,
       );
 
       if (!member) {
@@ -115,10 +132,8 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
           precision_permission: "admin",
           momentum_permission: "admin",
           // Custom fields from Better Auth organization schema
-          allowed_domains:
-            (activeOrg as Record<string, any>).allowedDomains ?? null,
-          auto_join_enabled:
-            (activeOrg as Record<string, any>).autoJoinEnabled ?? false,
+          allowed_domains: betterAuthOrg.allowedDomains ?? null,
+          auto_join_enabled: betterAuthOrg.autoJoinEnabled ?? false,
         });
         return;
       }
@@ -134,10 +149,8 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
         precision_permission: permissions.precision,
         momentum_permission: permissions.momentum,
         // Custom fields from Better Auth organization schema
-        allowed_domains:
-          (activeOrg as Record<string, any>).allowedDomains ?? null,
-        auto_join_enabled:
-          (activeOrg as Record<string, any>).autoJoinEnabled ?? false,
+        allowed_domains: betterAuthOrg.allowedDomains ?? null,
+        auto_join_enabled: betterAuthOrg.autoJoinEnabled ?? false,
       });
     } catch (error) {
       console.error("Error loading workspace:", error);
@@ -181,12 +194,14 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
     isLoading: isLoading || sessionLoading,
     switchToPersonal,
     switchToOrganization,
-    organizations: (organizationsList || []).map((org: any) => ({
-      id: org.id,
-      name: org.name,
-      slug: org.slug,
-      role: "member", // This would come from the members join - for now default to member
-    })),
+    organizations: (organizationsList || []).map(
+      (org: BetterAuthOrganization) => ({
+        id: org.id,
+        name: org.name,
+        slug: org.slug,
+        role: "member", // This would come from the members join - for now default to member
+      }),
+    ),
     refresh: loadWorkspace,
   };
 

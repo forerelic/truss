@@ -50,17 +50,17 @@ import type { auth } from "./server";
 // Get API base URL from environment
 const getBaseUrl = () => {
   // Production URL from environment variable
-  // @ts-ignore - import.meta.env is Vite-specific
+  // @ts-expect-error - import.meta.env is Vite-specific
   if (
     typeof import.meta !== "undefined" &&
     import.meta.env?.VITE_BETTER_AUTH_URL
   ) {
-    // @ts-ignore
+    // @ts-expect-error - import.meta.env is Vite-specific
     return import.meta.env.VITE_BETTER_AUTH_URL;
   }
 
   // Development: Connect to local Next.js server
-  // @ts-ignore
+  // @ts-expect-error - import.meta.env is Vite-specific
   if (typeof import.meta !== "undefined" && import.meta.env?.DEV) {
     console.log("[TauriAuthClient] Using local development server");
     return "http://localhost:3000";

@@ -61,7 +61,10 @@
         "!.next/**",
         "!dist/**"
       ],
-      "outputs": []
+      "outputs": [],
+      "env": [
+        "DEV"
+      ]
     },
     "check-types": {
       "dependsOn": ["^check-types"],
@@ -108,7 +111,8 @@
       "cache": false,
       "persistent": true,
       "env": [
-        "VITE_*"
+        "VITE_*",
+        "DEV"
       ]
     },
     "tauri": {
