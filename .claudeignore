@@ -1,0 +1,98 @@
+# ==============================================
+# Claude Code Ignore Configuration
+# ==============================================
+# Exclude large build artifacts and dependencies
+# to improve performance and reduce token usage
+
+# ==============================================
+# Dependencies (683MB)
+# ==============================================
+node_modules/
+
+# ==============================================
+# Rust Build Artifacts (7.8GB, 11,614 files)
+# ==============================================
+apps/*/src-tauri/target/
+apps/*/src-tauri/WixTools/
+apps/*/src-tauri/Cargo.lock
+
+# ==============================================
+# Build Outputs
+# ==============================================
+dist/
+build/
+out/
+.next/
+*.tsbuildinfo
+
+# ==============================================
+# Caches & Temp
+# ==============================================
+.turbo/
+.cache/
+.vercel/
+.tmp/
+tmp/
+temp/
+
+# ==============================================
+# Test & Coverage
+# ==============================================
+coverage/
+test-results/
+playwright-report/
+playwright/.cache/
+
+# ==============================================
+# Logs
+# ==============================================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ==============================================
+# OS Files
+# ==============================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+desktop.ini
+
+# ==============================================
+# Release Artifacts
+# ==============================================
+releases/
+*.dmg
+*.exe
+*.deb
+*.rpm
+*.AppImage
+*.snap
+*.msi
+*.pkg
+
+# ==============================================
+# Supabase Temp
+# ==============================================
+supabase/.temp/
+supabase/.branches/
+.supabase/
+
+# ==============================================
+# Bundle Analysis
+# ==============================================
+.webpack-bundle-analyzer/
+stats.json
+bundle-stats.html
+
+# ==============================================
+# Changesets Cache
+# ==============================================
+.changeset/.cache
+.changeset/.temp

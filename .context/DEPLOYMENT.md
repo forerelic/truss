@@ -1,4 +1,5 @@
 # 🚀 DEPLOYMENT GUIDE
+
 ## Truss Monorepo - Complete Production Deployment Manual
 
 > **Last Updated**: 2025-10-10
@@ -90,11 +91,11 @@ Local Development → Staging → Production
     (any branch)    (develop)    (main)
 ```
 
-| Environment | Branch | Web URL | Supabase | Purpose |
-|------------|--------|---------|----------|---------|
-| **Local** | Any | `localhost:3000` | Local instance | Feature development |
-| **Staging** | `develop` | `staging.truss.forerelic.com` | Staging DB | Integration testing |
-| **Production** | `main` | `truss.forerelic.com` | Production DB | Live users |
+| Environment    | Branch    | Web URL                       | Supabase       | Purpose             |
+| -------------- | --------- | ----------------------------- | -------------- | ------------------- |
+| **Local**      | Any       | `localhost:3000`              | Local instance | Feature development |
+| **Staging**    | `develop` | `staging.truss.forerelic.com` | Staging DB     | Integration testing |
+| **Production** | `main`    | `truss.forerelic.com`         | Production DB  | Live users          |
 
 ### Environment Files Structure
 
@@ -187,6 +188,7 @@ code apps/web/.env.local
 ```
 
 **Required variables:**
+
 ```bash
 # Database
 DATABASE_URL=postgresql://postgres:[password]@db.[project-ref].supabase.co:5432/postgres
@@ -215,6 +217,7 @@ code apps/momentum/.env.local
 ```
 
 **Desktop app variables:**
+
 ```bash
 VITE_SUPABASE_URL=https://[project-ref].supabase.co
 VITE_SUPABASE_ANON_KEY=eyJ...
@@ -284,6 +287,7 @@ bun run dev
 ### Development Workflow
 
 1. **Create feature branch**
+
    ```bash
    git checkout -b feature/my-feature
    ```
@@ -295,6 +299,7 @@ bun run dev
    - No manual action needed
 
 4. **Commit changes**
+
    ```bash
    git add .
    git commit -m "feat: add new feature"
@@ -306,6 +311,7 @@ bun run dev
    - Can skip with: `git push --no-verify`
 
 6. **Push to GitHub**
+
    ```bash
    git push origin feature/my-feature
    ```
@@ -351,6 +357,7 @@ bun run db:migration:create add_users_table
 ```
 
 This interactive script will:
+
 1. ✅ Create migration file
 2. ✅ Open it in your editor
 3. ✅ Wait for you to edit
@@ -463,11 +470,13 @@ git push origin develop
 #### 2. Automatic Deployments
 
 **Web App (Vercel)**:
+
 - ✅ Auto-deploys on push to `develop`
 - ✅ Accessible at: `https://staging.truss.forerelic.com`
 - ✅ Uses staging environment variables
 
 **Database Migrations**:
+
 - ✅ Auto-runs on push to `develop` (if `supabase/**` changed)
 - ✅ Validates SQL before deploying
 - ✅ Deploys to staging Supabase
@@ -564,12 +573,14 @@ git push origin main
 #### 2. Automatic Deployments
 
 **Web App (Vercel)**:
+
 - ✅ Auto-deploys on push to `main`
 - ✅ Accessible at: `https://truss.forerelic.com`
 - ✅ Uses production environment variables
 - ✅ Takes ~2-3 minutes
 
 **Database Migrations**:
+
 - ✅ Auto-runs on push to `main` (if `supabase/**` changed)
 - ✅ Creates automatic backup first
 - ✅ Shows migration diff
@@ -696,6 +707,7 @@ When you push a tag `precision-v*` or `momentum-v*`:
 5. ✅ Generates auto-updater JSON
 
 **Example tag patterns:**
+
 - `precision-v1.0.0` - Stable release
 - `precision-v1.0.0-beta.1` - Beta release
 - `momentum-v2.0.0` - Major version
@@ -797,6 +809,7 @@ git push origin revert/bad-feature
 **⚠️ IMPORTANT**: Database rollbacks are **complex** - migrations are forward-only.
 
 **Prevention (Best Practice)**:
+
 - ✅ Test thoroughly on staging
 - ✅ Use transactions in migrations
 - ✅ Create backups before deploying
@@ -893,17 +906,21 @@ open https://supabase.com/dashboard/project/[project-ref]/logs/postgres
 ### Performance Monitoring
 
 **Vercel Analytics**:
+
 - https://vercel.com/forerelic/truss/analytics
 
 **Supabase Metrics**:
+
 - https://supabase.com/dashboard/project/[project-ref]/reports
 
 ### Error Tracking
 
 **Vercel Errors**:
+
 - Dashboard → Logs → Filter by "error"
 
 **Better Auth Logs**:
+
 ```typescript
 // Server logs
 console.log("Auth event:", event);
@@ -1087,18 +1104,19 @@ bun run auth:test
 
 ### GitHub Actions Workflows
 
-| Workflow | Trigger | Purpose |
-|----------|---------|---------|
-| `ci.yml` | PR, push to main/develop | Lint, test, build |
-| `database.yml` | Push to main/develop (supabase changes) | Deploy migrations |
-| `validate-migrations.yml` | PR (supabase changes) | Validate SQL & types |
-| `changesets.yml` | Push to main | Version management |
-| `release-desktop.yml` | Tags `*-v*`, manual | Build installers |
-| `codeql.yml` | Weekly, PR | Security scanning |
+| Workflow                  | Trigger                                 | Purpose              |
+| ------------------------- | --------------------------------------- | -------------------- |
+| `ci.yml`                  | PR, push to main/develop                | Lint, test, build    |
+| `database.yml`            | Push to main/develop (supabase changes) | Deploy migrations    |
+| `validate-migrations.yml` | PR (supabase changes)                   | Validate SQL & types |
+| `changesets.yml`          | Push to main                            | Version management   |
+| `release-desktop.yml`     | Tags `*-v*`, manual                     | Build installers     |
+| `codeql.yml`              | Weekly, PR                              | Security scanning    |
 
 ### Environment Variables
 
 **GitHub Secrets (15)**:
+
 ```
 BETTER_AUTH_SECRET
 NEXT_PUBLIC_APP_URL
@@ -1118,6 +1136,7 @@ TURBO_TOKEN
 ```
 
 **GitHub Variables (2)**:
+
 ```
 TURBO_TEAM=forerelic
 ENABLE_CODE_SIGNING=false
@@ -1126,6 +1145,7 @@ ENABLE_CODE_SIGNING=false
 ### Package.json Scripts
 
 **Development**:
+
 ```bash
 bun run dev              # All apps
 bun run dev:web          # Web only
@@ -1134,6 +1154,7 @@ bun run dev:momentum     # Momentum only
 ```
 
 **Building**:
+
 ```bash
 bun run build            # All apps
 bun run build:web
@@ -1142,6 +1163,7 @@ bun run build:momentum
 ```
 
 **Quality**:
+
 ```bash
 bun run lint             # ESLint
 bun run format           # Prettier write
@@ -1150,6 +1172,7 @@ bun run check-types      # TypeScript
 ```
 
 **Database**:
+
 ```bash
 bun run db:start         # Start local Supabase
 bun run db:stop          # Stop local Supabase
@@ -1164,6 +1187,7 @@ bun run db:migration:create <name>  # Create migration
 ```
 
 **Utilities**:
+
 ```bash
 bun run cleanup-ports    # Kill port 3000/1420
 bun run clean            # Clean build artifacts
@@ -1172,16 +1196,19 @@ bun run clean            # Clean build artifacts
 ### URLs
 
 **Production**:
+
 - Web: https://truss.forerelic.com
 - GitHub: https://github.com/forerelic/truss
 - Vercel: https://vercel.com/forerelic/truss
 - Supabase: https://supabase.com/dashboard/project/[prod-id]
 
 **Staging**:
+
 - Web: https://staging.truss.forerelic.com
 - Supabase: https://supabase.com/dashboard/project/[staging-id]
 
 **Resources**:
+
 - Turborepo: https://turbo.build/repo/docs
 - Better Auth: https://better-auth.com/docs
 - Tauri: https://v2.tauri.app
