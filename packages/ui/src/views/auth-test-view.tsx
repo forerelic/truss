@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { authClient } from "../lib/auth/client";
+import { authClient } from "@truss/auth/client";
 import { Button } from "../components/button";
 import { Input } from "../components/input";
 import { Card } from "../components/card";

@@ -246,7 +246,7 @@ bun run db:studio
 # Generate from local database
 bun run db:generate:local
 
-# This creates: packages/ui/src/lib/supabase/types.ts
+# This creates: packages/database/src/types.ts
 ```
 
 ### 6. Verify Setup
@@ -382,7 +382,7 @@ bun run db:reset
 bun run db:generate:local
 
 # 5. Commit both migration and types
-git add supabase/migrations/ packages/ui/src/lib/supabase/types.ts
+git add supabase/migrations/ packages/database/src/types.ts
 git commit -m "feat: add users table"
 ```
 
@@ -967,10 +967,10 @@ bun run db:start
 bun run db:generate:local
 
 # Check diff
-git diff packages/ui/src/lib/supabase/types.ts
+git diff packages/database/src/types.ts
 
 # Commit if correct
-git add packages/ui/src/lib/supabase/types.ts
+git add packages/database/src/types.ts
 git commit -m "fix: update types after schema change"
 ```
 
@@ -1241,7 +1241,7 @@ bun run db:reset
 bun run db:generate:local
 
 # 4. Commit & push
-git add supabase/ packages/ui/src/lib/supabase/types.ts
+git add supabase/ packages/database/src/types.ts
 git commit -m "feat: add feature"
 git push origin main
 # ✅ Auto-deploys via GitHub Actions

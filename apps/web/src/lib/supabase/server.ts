@@ -1,6 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
-import type { Database } from "@truss/ui/lib/supabase/types";
+import type { Database } from "@truss/database";
 
 /**
  * Create a Supabase client for server-side operations in Next.js

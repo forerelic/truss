@@ -104,6 +104,40 @@
         "typescript": "5.9.2",
       },
     },
+    "packages/auth": {
+      "name": "@truss/auth",
+      "version": "0.0.0",
+      "devDependencies": {
+        "@truss/eslint-config": "*",
+        "@truss/typescript-config": "*",
+        "@types/node": "^22.15.3",
+        "@types/pg": "^8.15.5",
+        "@types/react": "19.1.0",
+        "eslint": "^9.34.0",
+        "typescript": "5.9.2",
+      },
+      "peerDependencies": {
+        "@daveyplate/better-auth-tauri": "^0.1.6",
+        "better-auth": "^1.3.27",
+        "pg": "^8.16.3",
+        "react": "^19.1.0",
+      },
+    },
+    "packages/database": {
+      "name": "@truss/database",
+      "version": "0.0.0",
+      "devDependencies": {
+        "@truss/eslint-config": "*",
+        "@truss/typescript-config": "*",
+        "@types/node": "^22.15.3",
+        "eslint": "^9.34.0",
+        "typescript": "5.9.2",
+      },
+      "peerDependencies": {
+        "@supabase/ssr": "^0.7.0",
+        "@supabase/supabase-js": "^2.74.0",
+      },
+    },
     "packages/eslint-config": {
       "name": "@truss/eslint-config",
       "version": "0.0.0",
@@ -119,6 +153,23 @@
         "globals": "^16.3.0",
         "typescript": "^5.9.2",
         "typescript-eslint": "^8.40.0",
+      },
+    },
+    "packages/shared": {
+      "name": "@truss/shared",
+      "version": "0.0.0",
+      "devDependencies": {
+        "@truss/eslint-config": "*",
+        "@truss/typescript-config": "*",
+        "@types/node": "^22.15.3",
+        "@types/react": "19.1.0",
+        "eslint": "^9.34.0",
+        "typescript": "5.9.2",
+      },
+      "peerDependencies": {
+        "@truss/auth": "*",
+        "@truss/database": "*",
+        "react": "^19.1.0",
       },
     },
     "packages/typescript-config": {
@@ -603,11 +654,17 @@
 
     "@tauri-apps/plugin-os": ["@tauri-apps/plugin-os@2.3.1", "", { "dependencies": { "@tauri-apps/api": "^2.8.0" } }, "sha512-ty5V8XDUIFbSnrk3zsFoP3kzN+vAufYzalJSlmrVhQTImIZa1aL1a03bOaP2vuBvfR+WDRC6NgV2xBl8G07d+w=="],
 
+    "@truss/auth": ["@truss/auth@workspace:packages/auth"],
+
+    "@truss/database": ["@truss/database@workspace:packages/database"],
+
     "@truss/eslint-config": ["@truss/eslint-config@workspace:packages/eslint-config"],
 
     "@truss/momentum": ["@truss/momentum@workspace:apps/momentum"],
 
     "@truss/precision": ["@truss/precision@workspace:apps/precision"],
+
+    "@truss/shared": ["@truss/shared@workspace:packages/shared"],
 
     "@truss/typescript-config": ["@truss/typescript-config@workspace:packages/typescript-config"],
 

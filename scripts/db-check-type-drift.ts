@@ -19,7 +19,7 @@ import { existsSync, mkdirSync } from "fs";
 import { join } from "path";
 
 const ROOT_DIR = join(import.meta.dir, "..");
-const TYPES_FILE = join(ROOT_DIR, "packages/ui/src/lib/supabase/types.ts");
+const TYPES_FILE = join(ROOT_DIR, "packages/database/src/types.ts");
 const TEMP_DIR = join(ROOT_DIR, ".temp");
 const TEMP_TYPES_FILE = join(TEMP_DIR, "types-generated.ts");
 

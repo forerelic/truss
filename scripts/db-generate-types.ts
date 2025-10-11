@@ -25,7 +25,7 @@ import { join } from "path";
 
 const ROOT_DIR = join(import.meta.dir, "..");
 const ENV_FILE = join(ROOT_DIR, ".env.local");
-const OUTPUT_FILE = join(ROOT_DIR, "packages/ui/src/lib/supabase/types.ts");
+const OUTPUT_FILE = join(ROOT_DIR, "packages/database/src/types.ts");
 
 // Parse CLI arguments
 const args = process.argv.slice(2);

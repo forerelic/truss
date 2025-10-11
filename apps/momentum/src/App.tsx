@@ -1,5 +1,5 @@
 import { useBetterAuthTauri } from "@daveyplate/better-auth-tauri/react";
-import { tauriAuthClient, useSession } from "@truss/ui/lib/auth/tauri-client";
+import { tauriAuthClient, useSession } from "@truss/auth/client/tauri";
 import { Card, CardContent, CardHeader, CardTitle } from "@truss/ui/components/card";
 import { Button } from "@truss/ui/components/button";
 

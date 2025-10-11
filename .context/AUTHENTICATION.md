@@ -33,7 +33,7 @@ The Next.js application serves dual purposes:
 
 **Location**: `apps/web/app/api/auth/[...all]/route.ts`
 
-**Configuration**: `packages/ui/src/lib/auth/server.ts`
+**Configuration**: `packages/auth/src/server.ts`
 
 **Features**:
 
@@ -503,7 +503,7 @@ Desktop apps use PKCE (Proof Key for Code Exchange) for OAuth:
 Admin-only operations are protected by the Better Auth admin plugin:
 
 ```typescript
-import { authClient } from "@truss/ui/lib/auth/client";
+import { authClient } from "@truss/auth/client";
 
 const { data: session } = authClient.useSession();
 const isAdmin = session?.user?.role === "admin";
@@ -516,7 +516,7 @@ Better Auth provides full TypeScript type inference:
 **Server Types**:
 
 ```typescript
-import type { auth } from "@truss/ui/lib/auth/server";
+import type { auth } from "@truss/auth/server";
 
 // Infer types from server config
 type User = typeof auth.$Infer.User;
@@ -599,7 +599,7 @@ const allowedOrigins = [
 # Production: Use transaction pooler URL
 DATABASE_URL=postgresql://postgres.[project-ref]:[password]@aws-0-[region].pooler.supabase.com:6543/postgres?pgbouncer=true
 
-# Check pool config in packages/ui/src/lib/auth/server.ts
+# Check pool config in packages/auth/src/server.ts
 max: 10,  # Max connections (increase if needed)
 ```
 
@@ -703,5 +703,5 @@ For issues or questions:
 
 ---
 
-**Last Updated**: 2025-10-10 **Maintainer**: Claude Code **Better Auth Version**: Latest (check
-`packages/ui/package.json`)
+**Last Updated**: 2025-10-11 **Maintainer**: Claude Code **Better Auth Version**: Latest (check
+`packages/auth/package.json`)

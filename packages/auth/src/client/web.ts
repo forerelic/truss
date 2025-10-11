@@ -8,7 +8,7 @@ import {
   inferAdditionalFields,
   inferOrgAdditionalFields,
 } from "better-auth/client/plugins";
-import type { auth } from "./server";
+import type { auth } from "../server";
 
 /**
  * Better Auth client for web applications (Next.js)
@@ -70,5 +70,6 @@ export const authClient = createAuthClient({
 });
 
 // Export commonly used hooks for convenience
+// Organization plugin hooks (useActiveOrganization, useListOrganizations) are added directly to authClient
 export const { useSession, signIn, signOut, signUp, useActiveOrganization, useListOrganizations } =
   authClient;

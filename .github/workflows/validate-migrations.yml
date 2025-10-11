@@ -4,7 +4,7 @@ on:
   pull_request:
     paths:
       - "supabase/**"
-      - "packages/ui/src/lib/supabase/types.ts"
+      - "packages/database/src/types.ts"
       - ".github/workflows/validate-migrations.yml"
 
 env:
@@ -70,19 +70,20 @@ jobs:
 
               // Post comment if there are uncommitted changes
               if (diff.trim()) {
-                const comment = `## ⚠️ Uncommitted Schema Changes Detected
-
-The following schema changes are in your database but not in migration files:
-
-\`\`\`sql
-${diff}
-\`\`\`
-
-**Action required:** Create a migration file for these changes using:
-\`\`\`bash
-bun run db:migration:create <migration_name>
-\`\`\`
-`;
+                const comment = [
+                  '## ⚠️ Uncommitted Schema Changes Detected',
+                  '',
+                  'The following schema changes are in your database but not in migration files:',
+                  '',
+                  '```sql',
+                  diff,
+                  '```',
+                  '',
+                  '**Action required:** Create a migration file for these changes using:',
+                  '```bash',
+                  'bun run db:migration:create <migration_name>',
+                  '```'
+                ].join('\n');
 
                 await github.rest.issues.createComment({
                   owner: context.repo.owner,

@@ -1,8 +1,8 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
-import { useSession, useActiveOrganization, useListOrganizations } from "../auth/client";
-import { getMemberAppPermissions } from "./permissions";
+import { useSession, useActiveOrganization, useListOrganizations } from "@truss/auth/client";
+import { getMemberAppPermissions } from "./utils";
 import type { WorkspaceContext, AppPermissionLevel, OrganizationRole } from "./types";
 
 // Better Auth organization types (until proper types are exported)

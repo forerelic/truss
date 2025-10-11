@@ -7,7 +7,7 @@ import {
   adminClient,
   inferAdditionalFields,
 } from "better-auth/client/plugins";
-import type { auth } from "./server";
+import type { auth } from "../server";
 
 /**
  * Better Auth client for Tauri native applications
@@ -97,5 +97,6 @@ export const tauriAuthClient = createAuthClient({
 });
 
 // Export commonly used hooks for convenience
+// Organization plugin hooks (useActiveOrganization, useListOrganizations) are added directly to tauriAuthClient
 export const { useSession, signIn, signOut, signUp, useActiveOrganization, useListOrganizations } =
   tauriAuthClient;

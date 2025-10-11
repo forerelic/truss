@@ -1,4 +1,4 @@
-import { auth } from "@truss/ui/lib/auth/server";
+import { auth } from "@truss/auth/server";
 import { toNextJsHandler } from "better-auth/next-js";
 import { NextRequest, NextResponse } from "next/server";
 

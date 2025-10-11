@@ -131,7 +131,7 @@
         "NEXT_PUBLIC_SUPABASE_URL",
         "SUPABASE_SERVICE_ROLE_KEY"
       ],
-      "outputs": ["packages/ui/src/lib/supabase/types.ts", "**/database.types.ts"]
+      "outputs": ["packages/database/src/types.ts", "**/database.types.ts"]
     },
     "test": {
       "dependsOn": ["^build"],
@@ -209,12 +209,12 @@
     "//#db:generate:local": {
       "cache": false,
       "env": ["SUPABASE_DB_URL", "DATABASE_URL"],
-      "outputs": ["packages/ui/src/lib/supabase/types.ts"]
+      "outputs": ["packages/database/src/types.ts"]
     },
     "//#db:generate:remote": {
       "cache": false,
       "env": ["SUPABASE_DB_URL", "DATABASE_URL"],
-      "outputs": ["packages/ui/src/lib/supabase/types.ts"]
+      "outputs": ["packages/database/src/types.ts"]
     },
     "//#env:validate": {
       "cache": false

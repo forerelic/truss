@@ -1,6 +1,6 @@
 "use client";
 
-import { getSupabaseClient } from "../supabase/client";
+import { getSupabaseClient } from "@truss/database/client";
 import type { AppName, AppPermissionLevel, MemberWithPermissions, OrganizationRole } from "./types";
 
 // Database row types (until Better Auth migrations are run)
