@@ -5,7 +5,6 @@
   "exports": {
     "./components/*": "./src/components/*.tsx",
     "./hooks/*": "./src/hooks/*.ts",
-    "./views/auth-test-view": "./src/views/auth-test-view.tsx",
     "./lib/utils": "./src/lib/utils.ts",
     "./globals.css": "./src/styles/globals.css",
     "./styles/theme.css": "./src/styles/theme.css"
@@ -14,6 +13,10 @@
     "lint": "eslint . --max-warnings 0",
     "generate:component": "turbo gen react-component",
     "check-types": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "@truss/lib": "*",
+    "@truss/types": "*"
   },
   "devDependencies": {
     "@truss/eslint-config": "*",

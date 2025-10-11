@@ -1,4 +1,9 @@
-// API Response Types based on Next.js 15 patterns
+/**
+ * API Response Types
+ *
+ * Standard API response patterns for all applications
+ * Based on Next.js 15 and REST best practices
+ */
 
 export enum HttpStatus {
   OK = 200,

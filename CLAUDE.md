@@ -60,13 +60,28 @@ bun run clean            # Clean build artifacts
 
 ### Package Organization
 
-- ✅ **@truss/ui**: Platform-agnostic UI components (work in both Vite and Next.js)
+**Foundation Packages** (no dependencies):
+
+- ✅ **@truss/types**: Centralized TypeScript type definitions
+- ✅ **@truss/lib**: Utility functions and helpers
+- ✅ **@truss/config**: Configuration, constants, and environment helpers
+
+**Infrastructure Packages**:
+
 - ✅ **@truss/database**: Supabase types and client
 - ✅ **@truss/auth**: Better Auth server config and clients (web/tauri)
-- ✅ **@truss/shared**: Business logic and shared utilities
+- ✅ **@truss/ui**: Platform-agnostic UI components (work in both Vite and Next.js)
+
+**Feature Packages**:
+
+- ✅ **@truss/features**: Modular business logic (organizations, projects, time-tracking)
+
+**Rules**:
+
 - ❌ **NEVER** import Next.js-specific features in shared packages
 - ❌ **NEVER** use Node.js-only libraries in shared packages
 - ✅ Next.js-specific code belongs in `apps/web/src/lib/` instead
+- ✅ Follow the dependency flow: Foundation → Infrastructure → Features → Apps
 
 ### Environment Files
 
@@ -111,9 +126,22 @@ bun run clean            # Clean build artifacts
 ### Imports
 
 ```typescript
-// UI Components
-import { Button } from "@truss/ui/components/button";
-import { cn } from "@truss/ui/lib/utils";
+// Types
+import type { ApiResponse, HttpStatus } from "@truss/types/api";
+import type { Database } from "@truss/types/database";
+import type { Result, Nullable } from "@truss/types/common";
+
+// Utilities
+import { formatDate, formatRelativeTime } from "@truss/lib/date";
+import { slugify, truncate } from "@truss/lib/string";
+import { isValidEmail, isStrongPassword } from "@truss/lib/validation";
+import { isTauri, getOS } from "@truss/lib/platform";
+import { debounce, sleep } from "@truss/lib/utils";
+
+// Configuration
+import { AUTH, URLS, PAGINATION } from "@truss/config/constants";
+import { getEnv, isDev, getApiUrl } from "@truss/config/env";
+import { features, isFeatureEnabled } from "@truss/config/features";
 
 // Database
 import type { Database } from "@truss/database";
@@ -124,9 +152,14 @@ import { auth } from "@truss/auth/server";
 import { authClient, useSession } from "@truss/auth/client"; // Web
 import { tauriAuthClient, useSession } from "@truss/auth/client/tauri"; // Desktop
 
-// Business Logic
-import { hasPermission } from "@truss/shared/organizations";
-import type { WorkspaceContext } from "@truss/shared/organizations/types";
+// UI Components
+import { Button } from "@truss/ui/components/button";
+import { cn } from "@truss/ui/lib/utils";
+
+// Business Logic & Features
+import { hasPermission, getAppAccess } from "@truss/features/organizations/permissions";
+import { useWorkspace, WorkspaceProvider } from "@truss/features/organizations/workspace-context";
+import type { WorkspaceContext, AppPermissionLevel } from "@truss/features/organizations/types";
 
 // Web app (Next.js specific)
 import { getSupabaseServerClient } from "@/lib/supabase/server";
@@ -142,10 +175,13 @@ apps/
   precision/  - Tauri v2 desktop app (estimation)
   momentum/   - Tauri v2 desktop app (tracking)
 packages/
-  ui/         - Shared platform-agnostic UI components
+  types/      - Centralized TypeScript types (@truss/types)
+  lib/        - Utility functions and helpers (@truss/lib)
+  config/     - Configuration and constants (@truss/config)
   database/   - Supabase types and client (@truss/database)
   auth/       - Better Auth server and clients (@truss/auth)
-  shared/     - Business logic and utilities (@truss/shared)
+  ui/         - Platform-agnostic UI components (@truss/ui)
+  features/   - Business logic features (@truss/features)
   eslint-config/
   typescript-config/
 scripts/      - Automation scripts
@@ -361,10 +397,13 @@ recommendations.
 
 Each package has ONE clear purpose:
 
+- ✅ `@truss/types` - TypeScript types ONLY
+- ✅ `@truss/lib` - Pure utility functions ONLY
+- ✅ `@truss/config` - Configuration and constants ONLY
 - ✅ `@truss/database` - Database types and client ONLY
 - ✅ `@truss/auth` - Authentication logic ONLY
-- ✅ `@truss/shared` - Business logic and utilities ONLY
 - ✅ `@truss/ui` - UI components ONLY
+- ✅ `@truss/features` - Business logic features ONLY
 - ❌ NEVER mix concerns (e.g., auth logic in UI package)
 
 #### Just-in-Time (JIT) Strategy
@@ -492,14 +531,14 @@ packages/my-package/
 
 ```typescript
 // ✅ GOOD: Re-export everything from a barrel file
-// packages/shared/src/index.ts
+// packages/features/src/index.ts
 export * from "./organizations";
-export * from "./types";
 
-// packages/shared/src/organizations/index.ts
+// packages/features/src/organizations/index.ts
 export type * from "./types";
 export * from "./permissions";
 export * from "./utils";
+export * from "./workspace-context";
 ```
 
 #### Subpath Exports
@@ -518,11 +557,11 @@ export * from "./utils";
 
 ```typescript
 // ✅ GOOD: Use specific imports
-import { hasPermission } from "@truss/shared/organizations";
-import type { WorkspaceContext } from "@truss/shared/organizations/types";
+import { hasPermission } from "@truss/features/organizations";
+import type { WorkspaceContext } from "@truss/features/organizations/types";
 
 // ❌ BAD: Don't use deep file imports
-import { hasPermission } from "@truss/shared/src/organizations/permissions";
+import { hasPermission } from "@truss/features/src/organizations/permissions";
 ```
 
 ### TypeScript Best Practices
@@ -594,12 +633,15 @@ export const authClient = createAuthClient({
 
 ```
 ❌ BAD:
-@truss/ui → @truss/auth → @truss/shared → @truss/ui  (circular!)
+@truss/ui → @truss/auth → @truss/features → @truss/ui  (circular!)
 
 ✅ GOOD:
-apps/web → @truss/auth → @truss/shared
-        → @truss/database
-        → @truss/ui
+apps/web → @truss/features → @truss/auth → @truss/config
+                          → @truss/database → @truss/config
+                          → @truss/lib
+                          → @truss/types → @truss/database
+        → @truss/ui → @truss/lib
+                  → @truss/types
 ```
 
 **Rules:**

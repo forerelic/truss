@@ -52,7 +52,7 @@ const WorkspaceContextContext = createContext<WorkspaceContextValue | undefined>
  *
  * Usage:
  * ```tsx
- * import { WorkspaceProvider } from '@repo/ui/lib/organizations/workspace-context'
+ * import { WorkspaceProvider } from '@truss/features/organizations/workspace-context'
  *
  * function App() {
  *   return (

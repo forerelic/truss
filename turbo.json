@@ -301,6 +301,74 @@
     "@truss/ui#build": {
       "outputs": [],
       "cache": true
+    },
+    "@truss/types#build": {
+      "outputs": [],
+      "cache": true
+    },
+    "@truss/types#lint": {
+      "cache": true
+    },
+    "@truss/types#check-types": {
+      "cache": true
+    },
+    "@truss/lib#build": {
+      "outputs": [],
+      "cache": true
+    },
+    "@truss/lib#lint": {
+      "cache": true
+    },
+    "@truss/lib#check-types": {
+      "cache": true
+    },
+    "@truss/config#build": {
+      "outputs": [],
+      "cache": true
+    },
+    "@truss/config#lint": {
+      "cache": true
+    },
+    "@truss/config#check-types": {
+      "cache": true
+    },
+    "@truss/features#build": {
+      "dependsOn": ["^build"],
+      "outputs": [],
+      "cache": true
+    },
+    "@truss/features#lint": {
+      "dependsOn": ["^lint"],
+      "cache": true
+    },
+    "@truss/features#check-types": {
+      "dependsOn": ["^check-types"],
+      "cache": true
+    },
+    "@truss/database#build": {
+      "outputs": [],
+      "cache": true
+    },
+    "@truss/database#lint": {
+      "dependsOn": ["^lint"],
+      "cache": true
+    },
+    "@truss/database#check-types": {
+      "dependsOn": ["^check-types"],
+      "cache": true
+    },
+    "@truss/auth#build": {
+      "dependsOn": ["^build"],
+      "outputs": [],
+      "cache": true
+    },
+    "@truss/auth#lint": {
+      "dependsOn": ["^lint"],
+      "cache": true
+    },
+    "@truss/auth#check-types": {
+      "dependsOn": ["^check-types"],
+      "cache": true
     }
   },
   "remoteCache": {}
