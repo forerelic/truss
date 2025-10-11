@@ -324,12 +324,11 @@ bun run db:generate:local
 
 ## Documentation
 
-For comprehensive deployment instructions, see **`DEPLOYMENT.md`** (600+ lines, single source of truth).
+For comprehensive deployment instructions, see **`DEPLOYMENT.md`** (600+ lines, single source of
+truth).
 
 For authentication details, see **`docs/AUTHENTICATION.md`**.
 
 ---
 
-**Last Updated**: 2025-10-10
-**Maintainer**: Claude Code
-**Version**: Production-ready (Grade A-)
+**Last Updated**: 2025-10-10 **Maintainer**: Claude Code **Version**: Production-ready (Grade A-)

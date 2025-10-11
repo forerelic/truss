@@ -31,7 +31,7 @@ export function getSupabaseClient() {
     throw new Error(
       "Missing Supabase environment variables. " +
         "Next.js: Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY. " +
-        "Vite: Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.",
+        "Vite: Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY."
     );
   }
 

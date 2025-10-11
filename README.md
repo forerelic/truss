@@ -1,6 +1,7 @@
 # MCP Suite
 
-A Turborepo monorepo containing **two professional desktop apps** (Precision & Momentum) and a **marketing website**. All apps share a single design system for maximum code reuse.
+A Turborepo monorepo containing **two professional desktop apps** (Precision & Momentum) and a
+**marketing website**. All apps share a single design system for maximum code reuse.
 
 ## 🏗️ Architecture
 

@@ -1,6 +1,7 @@
 # Authentication Architecture
 
-This document explains the authentication setup for the Truss monorepo, which includes a Next.js web app and two Tauri desktop applications (Precision & Momentum).
+This document explains the authentication setup for the Truss monorepo, which uses **Better Auth**
+(not Supabase Auth) with a Next.js authentication server and Supabase PostgreSQL database.
 
 ## Overview
 
@@ -9,11 +10,17 @@ graph TD
     A[Next.js Web App] -->|Hosts| B[Better Auth Server]
     C[Precision Desktop] -->|HTTPS/CORS| B
     D[Momentum Desktop] -->|HTTPS/CORS| B
-    B -->|Database| E[Supabase PostgreSQL]
+    B -->|pg Pool| E[Supabase PostgreSQL]
     B -->|OAuth| F[GitHub/Google]
-    C -->|Deep Links| G[OAuth Callback]
+    C -->|Deep Links| G[OAuth Callback truss://]
     D -->|Deep Links| G
+
+    style B fill:#22c55e,stroke:#16a34a,stroke-width:2px
+    style E fill:#3ecf8e,stroke:#10b981,stroke-width:2px
 ```
+
+**Important**: Supabase Auth is **DISABLED** in `supabase/config.toml` (line 123). We use Better
+Auth for framework-agnostic authentication.
 
 ## Architecture Components
 
@@ -22,107 +29,249 @@ graph TD
 The Next.js application serves dual purposes:
 
 - **Marketing website** for downloading desktop apps
-- **Authentication server** for all applications
+- **Centralized authentication server** for all applications (web + desktop)
 
 **Location**: `apps/web/app/api/auth/[...all]/route.ts`
 
-### 2. Tauri Desktop Apps
+**Configuration**: `packages/ui/src/lib/auth/server.ts`
 
-Both Precision and Momentum connect to the Better Auth server:
+**Features**:
 
-- **Local Development**: Connect to `http://localhost:3000`
-- **Production**: Connect to `https://your-app.vercel.app`
+- Email/password authentication
+- OAuth providers (GitHub, Google)
+- Two-factor authentication (TOTP)
+- Admin role management
+- Organization/team management with custom fields
+- Tauri deep link support (`@daveyplate/better-auth-tauri`)
+- Connection pooling via `pg` Pool (10 max connections)
+- Session management (7-day expiry, 5-minute cookie cache)
 
-### 3. Supabase Database
+### 2. Database Connection
 
-Better Auth uses Supabase PostgreSQL to store:
+Better Auth uses **pg Pool** for efficient connection pooling:
 
-- User accounts
-- Sessions
-- Organizations
-- Two-factor authentication data
+```typescript
+database: new Pool({
+  connectionString: DATABASE_URL,
+  max: 10, // Maximum connections
+  idleTimeoutMillis: 30000, // 30s idle timeout
+  connectionTimeoutMillis: 2000, // 2s connection timeout
+});
+```
+
+**Environment Variables** (priority order):
+
+1. `DATABASE_URL` (primary)
+2. `SUPABASE_DB_URL` (fallback for backward compatibility)
+
+**Recommended for Production**: Use Supabase transaction pooler URL:
+
+```
+postgresql://postgres.[project-ref]:[password]@aws-0-[region].pooler.supabase.com:6543/postgres?pgbouncer=true
+```
+
+### 3. Tauri Desktop Apps
+
+Both Precision and Momentum connect to the Better Auth server via CORS:
+
+- **Local Development**: `http://localhost:3000`
+- **Staging**: `https://staging.truss.forerelic.com`
+- **Production**: `https://truss.forerelic.com`
+
+**Deep Link Scheme**: `truss://` (configured in `tauri.conf.json`)
+
+**Plugin**: `@daveyplate/better-auth-tauri` handles OAuth flows and session persistence via cookies
+through Tauri's HTTP Plugin.
+
+### 4. Organization Management
+
+Better Auth organization plugin provides multi-tenant workspaces:
+
+**Roles**:
+
+- `owner`: Full control of organization + all apps
+- `admin`: Can manage members + set app permissions
+- `member`: Default role, app permissions control access
+- `guest`: Limited access, must have explicit app permissions
+
+**Custom Fields** (email domain auto-join, like Slack):
+
+```typescript
+allowedDomains: string[]  // ["company.com", "acme.org"]
+autoJoinEnabled: boolean  // Auto-add users with matching domains
+```
+
+**User Limits**:
+
+- Max organizations per user: 10
+- Users can switch between organizations
+- App-specific permissions managed separately
 
 ## Setup Guide
 
+### Prerequisites
+
+1. **Supabase Project** (for PostgreSQL database)
+2. **Bun** (`curl -fsSL https://bun.sh/install | bash`)
+3. **Node.js** v20.11.0 (see `.nvmrc`)
+4. **Supabase CLI** (`brew install supabase/tap/supabase`)
+
 ### Local Development
 
-1. **Start the authentication system**:
+#### 1. Start Supabase
 
-   ```bash
-   # For Precision app (automatically starts Next.js server)
-   bun run dev:precision
+```bash
+bun run db:start  # Start local Supabase on port 54321
+```
 
-   # For Momentum app (automatically starts Next.js server)
-   bun run dev:momentum
-   ```
+#### 2. Environment Variables
 
-   The development scripts automatically:
-   - Start the Next.js server (port 3000)
-   - Start the Vite dev server (port 1420)
-   - Wait for the auth server to be ready
-   - Launch the Tauri app
+**⚠️ CRITICAL**: Use **`.env.local`** files (NOT `.env`). The `.env` pattern is too easily committed
+to git.
 
-2. **Environment Variables**:
+**Web App** (`apps/web/.env.local`):
 
-   **Web App** (`apps/web/.env.local`):
+```env
+# Application URL
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 
-   ```env
-   DATABASE_URL=postgresql://...
-   NEXT_PUBLIC_SUPABASE_URL=https://...
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=...
-   ```
+# Database (use local Supabase connection pooler for testing)
+DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:54329/postgres
 
-   **Desktop Apps** (`apps/[precision|momentum]/.env`):
+# Better Auth secret (generate with: openssl rand -base64 32)
+BETTER_AUTH_SECRET=your-secret-key-here
 
-   ```env
-   VITE_BETTER_AUTH_URL=http://localhost:3000
-   VITE_SUPABASE_URL=https://...
-   VITE_SUPABASE_ANON_KEY=...
-   ```
+# Supabase public config
+NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-local-anon-key
+
+# OAuth (optional for local dev)
+GITHUB_CLIENT_ID=your-github-client-id
+GITHUB_CLIENT_SECRET=your-github-secret
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-secret
+```
+
+**Desktop Apps** (`apps/precision/.env.local`, `apps/momentum/.env.local`):
+
+```env
+# Auth server URL (points to Next.js app)
+VITE_API_BASE_URL=http://localhost:3000
+
+# Supabase public config (must match web app)
+VITE_SUPABASE_URL=http://127.0.0.1:54321
+VITE_SUPABASE_ANON_KEY=your-local-anon-key
+
+# App metadata
+VITE_APP_NAME=Precision  # or Momentum
+VITE_APP_VERSION=0.1.0
+
+# Development/debug
+VITE_DEBUG_MODE=true
+VITE_DEBUG_AUTH=true
+```
+
+**Setup Script**:
+
+```bash
+# Copy example files
+cp apps/web/.env.example apps/web/.env.local
+cp apps/precision/.env.example apps/precision/.env.local
+cp apps/momentum/.env.example apps/momentum/.env.local
+
+# Edit each file with your values
+```
+
+#### 3. Run Migrations
+
+```bash
+bun run db:reset       # Reset and apply all migrations
+bun run db:generate    # Generate TypeScript types
+```
+
+#### 4. Start Development
+
+```bash
+# Option 1: Start individual app (auto-starts web server)
+bun run dev:precision  # Starts Next.js + Vite + Tauri
+bun run dev:momentum   # Starts Next.js + Vite + Tauri
+
+# Option 2: Start web app only
+bun run dev:web
+
+# Option 3: Start all (separate terminals)
+bun run dev:web        # Terminal 1
+bun run tauri:dev      # Terminal 2 (from precision or momentum dir)
+```
+
+The `beforeDevCommand` in `tauri.conf.json` automatically:
+
+- Waits for Next.js server on port 3000
+- Starts Vite dev server on port 1420
+- Launches Tauri app
 
 ### Production Deployment
 
 #### 1. Deploy Next.js to Vercel
 
-1. **Set environment variables in Vercel**:
+**Set Environment Variables in Vercel Dashboard** (Project → Settings → Environment Variables):
 
-   ```env
-   DATABASE_URL=postgresql://... (use transaction pooler URL)
-   NEXT_PUBLIC_APP_URL=https://your-app.vercel.app
-   NEXT_PUBLIC_SUPABASE_URL=https://...
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=...
-   GITHUB_CLIENT_ID=... (optional)
-   GITHUB_CLIENT_SECRET=... (optional)
-   ```
+```env
+# Application URL
+NEXT_PUBLIC_APP_URL=https://truss.forerelic.com
 
-2. **Deploy**:
-   ```bash
-   vercel deploy --prod
-   ```
+# Database (use transaction pooler for production!)
+DATABASE_URL=postgresql://postgres.[project-ref]:[password]@aws-0-[region].pooler.supabase.com:6543/postgres?pgbouncer=true
 
-#### 2. Build Desktop Apps
+# Better Auth secret (MUST be different from dev/staging!)
+BETTER_AUTH_SECRET=<generate-unique-secret-with-openssl-rand-base64-32>
 
-1. **Update production environment**:
+# Supabase public config
+NEXT_PUBLIC_SUPABASE_URL=https://[project-ref].supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
-   Copy `.env.production` to `.env` and update:
+# OAuth (optional)
+GITHUB_CLIENT_ID=your-production-github-client-id
+GITHUB_CLIENT_SECRET=your-production-github-secret
+GOOGLE_CLIENT_ID=your-production-google-client-id
+GOOGLE_CLIENT_SECRET=your-production-google-secret
+```
 
-   ```env
-   VITE_BETTER_AUTH_URL=https://your-app.vercel.app
-   ```
+**Scopes**: Set each variable to `Production`, `Preview`, and `Development` as needed.
 
-2. **Build the apps**:
+**Deploy**:
 
-   ```bash
-   # Build Precision
-   cd apps/precision
-   bun run build
-   bun run tauri build
+```bash
+git push origin main  # Vercel auto-deploys via Git integration
+```
 
-   # Build Momentum
-   cd apps/momentum
-   bun run build
-   bun run tauri build
-   ```
+#### 2. Build Desktop Apps for Production
+
+**Update Environment** (`apps/precision/.env.production`, `apps/momentum/.env.production`):
+
+```env
+VITE_API_BASE_URL=https://truss.forerelic.com
+VITE_SUPABASE_URL=https://[project-ref].supabase.co
+VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+VITE_APP_NAME=Precision  # or Momentum
+VITE_APP_VERSION=1.0.0
+VITE_DEBUG_MODE=false
+VITE_DEBUG_AUTH=false
+```
+
+**Build**:
+
+```bash
+# Via GitHub Actions (recommended)
+git tag precision-v1.0.0
+git push origin precision-v1.0.0
+# Triggers .github/workflows/release-desktop.yml
+
+# Or manually
+cd apps/precision
+bun run build
+bun run tauri build
+```
 
 ## Authentication Flow
 
@@ -132,16 +281,20 @@ Better Auth uses Supabase PostgreSQL to store:
 sequenceDiagram
     participant U as User
     participant T as Tauri App
-    participant B as Better Auth Server
-    participant S as Supabase DB
+    participant A as Better Auth API
+    participant P as pg Pool
+    participant D as Supabase PostgreSQL
 
     U->>T: Enter credentials
-    T->>B: POST /api/auth/sign-in
-    B->>S: Verify credentials
-    S-->>B: User data
-    B-->>T: Session + Cookie
-    T->>T: Store session
-    T-->>U: Authenticated
+    T->>A: POST /api/auth/sign-in
+    A->>P: Get connection
+    P->>D: Query user + verify password
+    D-->>P: User data
+    P-->>A: Release connection
+    A->>A: Create session + sign cookie
+    A-->>T: Set-Cookie + session data
+    T->>T: Store session (via Tauri HTTP)
+    T-->>U: Authenticated ✓
 ```
 
 ### 2. OAuth Authentication (GitHub/Google)
@@ -150,23 +303,112 @@ sequenceDiagram
 sequenceDiagram
     participant U as User
     participant T as Tauri App
-    participant B as Better Auth Server
-    participant O as OAuth Provider
+    participant A as Better Auth API
+    participant O as OAuth Provider (GitHub)
+    participant D as Database
 
     U->>T: Click "Sign in with GitHub"
-    T->>B: GET /api/auth/sign-in/github
-    B->>O: Redirect to OAuth
-    O->>U: Authorize app
-    O->>B: Callback with code
-    B->>B: Exchange code for token
-    B->>T: Deep link: truss://auth/callback
-    T->>T: Complete auth flow
-    T-->>U: Authenticated
+    T->>A: GET /api/auth/sign-in/github
+    A->>O: Redirect to OAuth authorize
+    O->>U: Show authorization prompt
+    U->>O: Click "Authorize"
+    O->>A: Callback with authorization code
+    A->>O: Exchange code for access token
+    O-->>A: Access token + user profile
+    A->>D: Create/update user + session
+    A->>T: Deep link: truss://auth/callback?token=...
+    Note over T: @daveyplate/better-auth-tauri<br/>handles deep link
+    T->>T: Complete auth flow + store session
+    T-->>U: Authenticated ✓
 ```
+
+### 3. Session Management
+
+**Session Lifecycle**:
+
+- **Duration**: 7 days (`expiresIn: 60 * 60 * 24 * 7`)
+- **Update Frequency**: 24 hours (`updateAge: 60 * 60 * 24`)
+- **Cookie Cache**: 5 minutes (`cookieCache.maxAge: 5 * 60`)
+- **Secure Cookies**: Production only (`useSecureCookies: process.env.NODE_ENV === "production"`)
+
+**Tauri Session Persistence**:
+
+- Handled automatically by `@daveyplate/better-auth-tauri`
+- Uses Tauri HTTP Plugin with cookie support
+- No custom storage needed
+
+## API Endpoints
+
+Better Auth provides these endpoints under `/api/auth/`:
+
+### Authentication
+
+- `POST /sign-up` - Register new user
+- `POST /sign-in` - Sign in with email/password
+- `POST /sign-out` - Sign out
+- `GET /get-session` - Get current session
+- `POST /verify-email` - Verify email address
+- `POST /forgot-password` - Request password reset
+- `POST /reset-password` - Reset password
+
+### OAuth
+
+- `GET /sign-in/github` - GitHub OAuth flow
+- `GET /sign-in/google` - Google OAuth flow
+
+### User Management
+
+- `POST /update-user` - Update user profile
+- `POST /delete-user` - Delete account
+
+### Two-Factor Authentication
+
+- `POST /two-factor/enable` - Enable 2FA
+- `POST /two-factor/verify` - Verify 2FA code
+- `POST /two-factor/disable` - Disable 2FA
+
+### Organization Management
+
+- `POST /organization/create` - Create organization
+- `GET /organization/list` - List user's organizations
+- `POST /organization/invite` - Invite member
+- `POST /organization/set-active` - Switch active organization
+- `POST /organization/update` - Update organization settings
+
+### Admin
+
+- `POST /admin/set-role` - Set user role (admin only)
+- `POST /admin/list-users` - List all users (admin only)
+
+## CORS Configuration
+
+The API route (`apps/web/app/api/auth/[...all]/route.ts`) includes CORS headers for desktop app
+access:
+
+**Allowed Origins**:
+
+```typescript
+const allowedOrigins = [
+  "http://localhost:1420", // Tauri dev server
+  "http://localhost:1421", // Alternative Tauri port
+  "tauri://localhost", // Tauri production
+  "https://tauri.localhost", // Tauri production HTTPS
+  process.env.NEXT_PUBLIC_APP_URL, // Production web URL
+];
+```
+
+**CORS Headers**:
+
+- `Access-Control-Allow-Credentials: true`
+- `Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS`
+- `Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, Accept`
+- `Access-Control-Allow-Origin: <origin>` (dynamic based on request)
+
+**Development Mode**: Allows all `localhost` origins for easier development.
 
 ## Deep Links Configuration
 
-Both Tauri apps are configured with the `truss://` scheme for OAuth callbacks:
+Both Tauri apps use the `truss://` scheme for OAuth callbacks:
 
 **`tauri.conf.json`**:
 
@@ -182,118 +424,284 @@ Both Tauri apps are configured with the `truss://` scheme for OAuth callbacks:
 }
 ```
 
-## CORS Configuration
+**Better Auth Server Plugin**:
 
-The Better Auth server includes CORS headers for desktop app access:
+```typescript
+tauri({
+  scheme: "truss", // Must match tauri.conf.json
+  callbackURL: "/", // Post-auth redirect
+  successText: "Authentication successful! You can close this window.",
+  debugLogs: process.env.NODE_ENV === "development",
+});
+```
 
-**Allowed Origins**:
+**Tauri App Hook** (`useBetterAuthTauri` from `@daveyplate/better-auth-tauri/react`):
 
-- `http://localhost:1420` (development)
-- `tauri://localhost` (production)
-- `https://tauri.localhost` (production HTTPS)
+```typescript
+useBetterAuthTauri({
+  authClient: tauriAuthClient,
+  scheme: "truss",
+  debugLogs: import.meta.env.DEV,
+  onSuccess: (callbackURL) => {
+    console.log("✅ Auth successful");
+    // Navigate to dashboard or callback URL
+  },
+  onError: (error) => {
+    console.error("❌ Auth error:", error);
+  },
+});
+```
 
 ## Security Considerations
 
-### 1. PKCE Flow
+### 1. Connection Pooling
 
-Desktop apps use the PKCE (Proof Key for Code Exchange) flow for OAuth, which is more secure for public clients.
+Better Auth uses `pg` Pool for efficient database connections:
 
-### 2. Secure Token Storage
+- **Max connections**: 10 (prevents exhaustion)
+- **Idle timeout**: 30 seconds
+- **Connection timeout**: 2 seconds
+- **Production**: Use Supabase transaction pooler URL
 
-Tokens are stored using Tauri's secure storage plugin (`@tauri-apps/plugin-store`).
+### 2. Supabase Auth Disabled
 
-### 3. Environment Variables
+Supabase Auth is explicitly disabled in `supabase/config.toml`:
 
-- **Never commit** `.env` files with real credentials
-- Use `.env.example` files for documentation
-- Store production secrets in Vercel environment variables
+```toml
+[auth]
+enabled = false  # Using Better Auth instead
+```
 
-### 4. Supabase Anon Key
+**Why?**
 
-The Supabase anon key is safe to expose in client applications as it's designed for public use with Row Level Security (RLS).
+- Better Auth is framework-agnostic (works in Next.js + Tauri)
+- More flexible plugin system
+- No conflicts with Supabase Auth hooks/triggers
+
+### 3. Secure Token Storage
+
+- **Web**: Cookies with `httpOnly` and `secure` flags (production)
+- **Desktop**: Handled by `@daveyplate/better-auth-tauri` via Tauri HTTP Plugin
+
+### 4. Environment Variables
+
+- ✅ **Use `.env.local`** (gitignored) - NOT `.env`
+- ✅ **Different secrets per environment** (dev/staging/production)
+- ✅ **Transaction pooler URL for production**
+- ❌ **Never commit `.env.local`** to git
+- ❌ **Never expose service role keys**
+
+### 5. PKCE Flow
+
+Desktop apps use PKCE (Proof Key for Code Exchange) for OAuth:
+
+- More secure for public clients (no client secret needed)
+- Better Auth + Tauri plugin handle PKCE automatically
+
+### 6. Admin Role Protection
+
+Admin-only operations are protected by the Better Auth admin plugin:
+
+```typescript
+import { authClient } from "@truss/ui/lib/auth/client";
+
+const { data: session } = authClient.useSession();
+const isAdmin = session?.user?.role === "admin";
+```
+
+## Type Safety
+
+Better Auth provides full TypeScript type inference:
+
+**Server Types**:
+
+```typescript
+import type { auth } from "@truss/ui/lib/auth/server";
+
+// Infer types from server config
+type User = typeof auth.$Infer.User;
+type Session = typeof auth.$Infer.Session;
+```
+
+**Client Types**:
+
+```typescript
+import { inferAdditionalFields } from "better-auth/client/plugins";
+import type { auth } from "./server";
+
+// Infer additional user fields
+const authClient = createAuthClient({
+  plugins: [inferAdditionalFields<typeof auth>()],
+});
+```
+
+**Organization Types**:
+
+```typescript
+import { inferOrgAdditionalFields } from "better-auth/client/plugins";
+
+// Infer organization custom fields (allowedDomains, autoJoinEnabled)
+organizationClient({
+  schema: inferOrgAdditionalFields<typeof auth>(),
+});
+```
 
 ## Troubleshooting
 
 ### Common Issues
 
-1. **"Failed to load resource: Could not connect to the server"**
-   - Ensure Next.js server is running on port 3000
-   - Check VITE_BETTER_AUTH_URL in desktop app .env
+#### 1. "Failed to load resource: Could not connect to the server"
 
-2. **OAuth redirect not working**
-   - Verify deep link scheme matches in all configs
-   - Check OAuth provider callback URL configuration
+**Symptoms**: Desktop app can't reach auth server
 
-3. **CORS errors**
-   - Verify origin is in allowed list in API route
-   - Check development mode is enabled
+**Solution**:
+
+```bash
+# Check Next.js server is running
+curl http://localhost:3000/api/auth/get-session
+
+# Verify desktop app env
+cat apps/precision/.env.local | grep VITE_API_BASE_URL
+# Should be: VITE_API_BASE_URL=http://localhost:3000
+```
+
+#### 2. OAuth redirect not working
+
+**Symptoms**: OAuth flow opens browser but doesn't return to app
+
+**Solution**:
+
+- Verify deep link scheme matches: `truss://` in both `tauri.conf.json` and Better Auth config
+- Check OAuth provider callback URL in GitHub/Google console
+- Enable debug logs: `VITE_DEBUG_AUTH=true`
+
+#### 3. CORS errors
+
+**Symptoms**: "Access-Control-Allow-Origin" errors in console
+
+**Solution**:
+
+```typescript
+// Verify origin is allowed in apps/web/app/api/auth/[...all]/route.ts
+const allowedOrigins = [
+  "http://localhost:1420", // ← Check this matches your Vite port
+  // ...
+];
+```
+
+#### 4. Database connection errors
+
+**Symptoms**: "Connection timeout" or "Too many connections"
+
+**Solution**:
+
+```bash
+# Production: Use transaction pooler URL
+DATABASE_URL=postgresql://postgres.[project-ref]:[password]@aws-0-[region].pooler.supabase.com:6543/postgres?pgbouncer=true
+
+# Check pool config in packages/ui/src/lib/auth/server.ts
+max: 10,  # Max connections (increase if needed)
+```
+
+#### 5. Session not persisting
+
+**Symptoms**: User logged out after refresh
+
+**Solution**:
+
+- Verify `useBetterAuthTauri` hook is in App component root
+- Check Tauri HTTP Plugin is enabled
+- Enable debug: `debugLogs: true` in `useBetterAuthTauri`
 
 ### Debug Mode
 
-Enable debug logging in desktop apps:
+Enable comprehensive debug logging:
+
+**Web App** (`apps/web/.env.local`):
+
+```env
+NODE_ENV=development
+```
+
+**Desktop Apps** (`apps/precision/.env.local`):
 
 ```env
 VITE_DEBUG_MODE=true
 VITE_DEBUG_AUTH=true
 ```
 
-## API Endpoints
+**Better Auth Server**:
 
-Better Auth provides these endpoints (all under `/api/auth/`):
+- Already logs in development mode
+- Check server console for API requests
 
-- `POST /sign-up` - Register new user
-- `POST /sign-in` - Sign in with email/password
-- `GET /sign-in/github` - GitHub OAuth
-- `GET /sign-in/google` - Google OAuth
-- `POST /sign-out` - Sign out
-- `GET /get-session` - Get current session
-- `POST /update-user` - Update user profile
-- `POST /delete-user` - Delete account
-- `POST /verify-email` - Verify email address
-- `POST /forgot-password` - Request password reset
-- `POST /reset-password` - Reset password
+**Tauri Console**:
+
+```bash
+# macOS
+~/Library/Logs/com.forerelic.truss.precision/
+
+# Windows
+%APPDATA%\com.forerelic.truss.precision\logs\
+
+# Linux
+~/.local/share/com.forerelic.truss.precision/logs/
+```
 
 ## Testing Authentication
 
-### Local Testing
+### Local Testing Checklist
 
-1. **Start the system**:
+- [ ] Start Supabase: `bun run db:start`
+- [ ] Start web app: `bun run dev:web`
+- [ ] Start desktop app: `bun run dev:precision`
+- [ ] Test sign-up with email/password
+- [ ] Verify user in Supabase Studio: `bun run db:studio`
+- [ ] Test sign-in with same credentials
+- [ ] Test OAuth flow (GitHub/Google)
+- [ ] Test session persistence (close/reopen app)
+- [ ] Test sign-out
 
-   ```bash
-   bun run dev:precision
-   ```
+### Production Testing Checklist
 
-2. **Test sign-up**:
-   - Open the app
-   - Click "Sign Up"
-   - Enter test credentials
-   - Verify account creation in Supabase dashboard
-
-3. **Test OAuth**:
-   - Click "Sign in with GitHub"
-   - Authorize in browser
-   - Verify deep link callback works
-
-### Production Testing
-
-1. Deploy to Vercel
-2. Update desktop app with production URL
-3. Build and install desktop app
-4. Test authentication flows
+- [ ] Deploy to Vercel with production env vars
+- [ ] Build desktop app with production env
+- [ ] Test all auth flows (email, GitHub, Google)
+- [ ] Verify deep links work (OAuth callback)
+- [ ] Test session persistence
+- [ ] Check CORS with production URL
+- [ ] Verify database connections use pooler URL
 
 ## Migration from Other Auth Systems
 
 If migrating from another authentication system:
 
-1. Export user data from old system
-2. Import to Supabase using Better Auth migration tools
-3. Update user passwords (require reset on first login)
-4. Migrate OAuth provider registrations
+1. **Export user data** from old system (CSV, SQL dump)
+2. **Transform to Better Auth schema**:
+
+   ```sql
+   -- user table
+   id, email, emailVerified, name, image, createdAt, updatedAt, role, metadata
+
+   -- session table
+   id, userId, expiresAt, token, ipAddress, userAgent
+   ```
+
+3. **Import to Supabase** using Better Auth migration tools
+4. **Update user passwords**: Require reset on first login if hashing changed
+5. **Migrate OAuth connections**: Link existing OAuth accounts to Better Auth users
 
 ## Support
 
 For issues or questions:
 
-- Check [Better Auth docs](https://better-auth.com)
-- Check [Tauri docs](https://tauri.app)
-- Review [Supabase Auth docs](https://supabase.com/docs/guides/auth)
+- **Better Auth Docs**: https://better-auth.com
+- **Better Auth Tauri Plugin**: https://github.com/DaveyPlate/better-auth-tauri
+- **Tauri Docs**: https://tauri.app
+- **Supabase Docs**: https://supabase.com/docs
+- **GitHub Issues**: Create issue in this repository
+
+---
+
+**Last Updated**: 2025-10-10 **Maintainer**: Claude Code **Better Auth Version**: Latest (check
+`packages/ui/package.json`)

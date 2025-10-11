@@ -1,193 +1,52 @@
 # Scripts Directory
 
-Utility scripts for the Truss monorepo.
+Automation scripts for the Truss monorepo.
 
-## Database & Migration Scripts
+## Database Management
 
-### `db-migration-helper.sh` 🚀
+| Script                      | Description                      | Usage                      |
+| --------------------------- | -------------------------------- | -------------------------- |
+| `db-check-type-drift.ts`    | Check for Supabase type drift    | `bun run db:types:check`   |
+| `db-generate-types.ts`      | Generate TypeScript types        | `bun run db:generate`      |
+| `db-health-check.ts`        | Validate database health         | `bun run db:health`        |
+| `db-migration-helper.sh`    | Interactive migration creator    | `bun run db:migration:new` |
+| `db-pull-schema.ts`         | Pull schema from Supabase        | `bun run db:pull`          |
+| `db-push-safe.ts`           | Safe schema push with validation | `bun run db:push`          |
+| `db-validate-migrations.ts` | Validate migration files         | `bun run db:validate`      |
 
-Interactive helper for creating migrations with automatic type generation.
+## Authentication
 
-**Use when:** Creating new database migrations.
+| Script                       | Description                     | Usage                   |
+| ---------------------------- | ------------------------------- | ----------------------- |
+| `generate-auth-migration.ts` | Generate Better Auth migrations | `bun run auth:generate` |
+| `test-better-auth.ts`        | Test Better Auth configuration  | `bun run auth:test`     |
 
-**Usage:**
+## Environment & Utilities
 
-```bash
-bun run db:migration:create add_users_table
-```
+| Script                    | Description                         | Usage                   |
+| ------------------------- | ----------------------------------- | ----------------------- |
+| `validate-environment.ts` | Validate environment variables      | `bun run env:validate`  |
+| `cleanup-ports.sh`        | Kill processes on conflicting ports | `bun run cleanup-ports` |
 
-**What it does:**
+## Setup Scripts (Archived)
 
-1. Creates a new migration file
-2. Opens it in your default editor
-3. Applies the migration locally
-4. Generates TypeScript types automatically
-5. Formats the generated types with Prettier
-6. Shows you the next steps to commit
+One-time setup scripts are in `/docs/setup-scripts/`:
 
----
+- `set-vercel-env.sh` - Configure Vercel environment variables
+- `setup-github-secrets.sh` - Configure GitHub secrets
 
-### `db-generate-types.ts` 📝
+These are rarely needed after initial project setup.
 
-Generates TypeScript types from your Supabase database schema.
+## Adding New Scripts
 
-**Use when:** You need to update types after schema changes.
+1. Create script in `/scripts/` directory
+2. Add executable permissions: `chmod +x scripts/your-script.sh`
+3. Add to `package.json` scripts section
+4. Update this README with description and usage
 
-**Usage:**
+## Development Notes
 
-```bash
-bun run db:generate              # Auto-detect (local or remote)
-bun run db:generate:local        # Force local database
-bun run db:generate:remote       # Force remote database
-```
-
-**What it does:**
-
-1. Connects to Supabase (local or remote)
-2. Generates TypeScript types
-3. Saves to `packages/ui/src/lib/supabase/types.ts`
-
----
-
-### `db-check-type-drift.ts` 🔍
-
-Checks if committed types match the current database schema.
-
-**Use when:** Validating migrations in CI or before pushing.
-
-**Usage:**
-
-```bash
-bun run db:types:check
-```
-
-**What it does:**
-
-1. Generates types from current local database
-2. Compares with committed `types.ts` file
-3. Shows diff if they don't match
-4. Exits with error if drift detected (fails CI)
-
----
-
-### `db-validate-migrations.ts` ✅
-
-Validates SQL syntax and checks for common migration issues.
-
-**Use when:** Before committing migrations or in CI.
-
-**Usage:**
-
-```bash
-bun run db:validate [migration-file]
-```
-
-**What it checks:**
-
-- ✅ SQL syntax validity
-- ✅ Dangerous operations (DROP TABLE without IF EXISTS)
-- ✅ Missing RLS (Row Level Security) policies
-- ✅ Foreign keys without ON DELETE clauses
-- ✅ Table creation without IF NOT EXISTS
-
----
-
-### `db-push-safe.ts` 🛡️
-
-Safely pushes migrations with validation checks.
-
-**Use when:** Manually deploying migrations.
-
-**Usage:**
-
-```bash
-bun run db:push
-```
-
-**What it does:**
-
-1. Validates migrations first
-2. Shows a confirmation prompt
-3. Pushes to the database
-4. Handles errors gracefully
-
----
-
-### `db-health-check.ts` 🏥
-
-Checks database connection and migration status.
-
-**Usage:**
-
-```bash
-bun run db:health
-```
-
----
-
-### `db-pull-schema.ts` ⬇️
-
-Pulls the current database schema into migration files.
-
-**Use when:** Syncing local migrations with remote schema.
-
-**Usage:**
-
-```bash
-bun run db:pull
-```
-
----
-
-## Development Scripts
-
-### `cleanup-ports.sh` 🧹
-
-Kills processes on ports 3000 and 1420.
-
-**Use when:** You get "EADDRINUSE" errors.
-
-**Usage:**
-
-```bash
-./scripts/cleanup-ports.sh
-# or via package.json
-bun run cleanup-ports
-```
-
-**What it does:**
-
-1. Checks if ports 3000 and 1420 are in use
-2. Sends SIGTERM (graceful shutdown) to processes
-3. Waits 5 seconds for graceful shutdown
-4. Sends SIGKILL if processes don't respond
-5. Reports success/failure for each port
-
----
-
-## Troubleshooting
-
-### "EADDRINUSE: address already in use"
-
-```bash
-bun run cleanup-ports
-```
-
-### Old processes keep hanging around
-
-```bash
-# Kill all node/bun processes
-pkill -f "node\|bun"
-
-# Or use cleanup script
-bun run cleanup-ports
-```
-
----
-
-## Quick Reference
-
-| Command                 | What it does                      |
-| ----------------------- | --------------------------------- |
-| `bun run cleanup-ports` | Kill processes on ports 3000/1420 |
-| `bun run health-check`  | Verify all services are healthy   |
+- All TypeScript scripts run with `bun` for fast execution
+- Shell scripts use `#!/usr/bin/env bash` for portability
+- Scripts follow the principle: "Fail fast, fail loud"
+- Always validate inputs and provide clear error messages

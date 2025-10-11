@@ -32,7 +32,7 @@ const getDatabaseUrl = () => {
   throw new Error(
     "Missing DATABASE_URL environment variable. " +
       "Please set it in your .env.local file. " +
-      "Format: postgresql://postgres:[password]@db.[project-ref].supabase.co:5432/postgres",
+      "Format: postgresql://postgres:[password]@db.[project-ref].supabase.co:5432/postgres"
   );
 };
 

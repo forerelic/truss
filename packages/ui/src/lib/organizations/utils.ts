@@ -27,7 +27,7 @@ export function hasPermission(granted: AppPermissionLevel, required: AppPermissi
  */
 export function checkPermission(
   granted: AppPermissionLevel,
-  required: AppPermissionLevel,
+  required: AppPermissionLevel
 ): PermissionCheck {
   const hasAccess = hasPermission(granted, required);
 

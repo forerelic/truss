@@ -23,7 +23,7 @@ export class ApiError extends Error {
     public statusCode: number,
     public code: string,
     message: string,
-    public details?: unknown,
+    public details?: unknown
   ) {
     super(message);
     this.name = "ApiError";
@@ -31,7 +31,7 @@ export class ApiError extends Error {
 }
 
 export function isSuccessResponse<T, E>(
-  response: ApiResponse<T, E>,
+  response: ApiResponse<T, E>
 ): response is ApiResponse<T, E> & { success: true } {
   return response.success === true;
 }

@@ -316,7 +316,7 @@ if (checks.failed === 0) {
     console.log("  3. Start development: bun run dev:precision");
   } else {
     console.log(
-      `  1. Deploy to ${environment}: git push origin ${environment === "staging" ? "develop" : "main"}`,
+      `  1. Deploy to ${environment}: git push origin ${environment === "staging" ? "develop" : "main"}`
     );
     console.log("  2. Monitor deployment: Check GitHub Actions");
   }

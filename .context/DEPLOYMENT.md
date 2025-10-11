@@ -2,11 +2,11 @@
 
 ## Truss Monorepo - Complete Production Deployment Manual
 
-> **Last Updated**: 2025-10-10
-> **Status**: ✅ Production-Ready
-> **For**: Solo developers and small teams
+> **Last Updated**: 2025-10-10 **Status**: ✅ Production-Ready **For**: Solo developers and small
+> teams
 
-This is the **single source of truth** for deploying the Truss monorepo. Everything you need to ship from local development to production.
+This is the **single source of truth** for deploying the Truss monorepo. Everything you need to ship
+from local development to production.
 
 ---
 
@@ -121,7 +121,8 @@ apps/momentum/
   .env.staging.example     # ← Template for staging
 ```
 
-**⚠️ NEVER create a root `.env.local` file** - This causes environment variable leakage between apps.
+**⚠️ NEVER create a root `.env.local` file** - This causes environment variable leakage between
+apps.
 
 ---
 

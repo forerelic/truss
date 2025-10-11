@@ -55,7 +55,7 @@ export async function getSupabaseServerClient(): Promise<
         setAll(cookiesToSet) {
           try {
             cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options),
+              cookieStore.set(name, value, options)
             );
           } catch {
             // The `setAll` method was called from a Server Component.
@@ -64,7 +64,7 @@ export async function getSupabaseServerClient(): Promise<
           }
         },
       },
-    },
+    }
   );
 }
 
@@ -120,7 +120,7 @@ export function getSupabaseAdminClient(): ReturnType<typeof createServerClient<D
   if (!supabaseUrl || !supabaseServiceRoleKey) {
     throw new Error(
       "Missing Supabase admin credentials. " +
-        "Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY (server-side only).",
+        "Set NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY (server-side only)."
     );
   }
 

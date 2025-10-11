@@ -31,7 +31,7 @@ interface MemberRow {
  * Get app permissions for a member in an organization
  */
 export async function getMemberAppPermissions(
-  memberId: string,
+  memberId: string
 ): Promise<{ precision: AppPermissionLevel; momentum: AppPermissionLevel }> {
   const supabase = getSupabaseClient();
 
@@ -68,7 +68,7 @@ export async function getMemberAppPermissions(
 export async function setMemberAppPermission(
   memberId: string,
   app: AppName,
-  permission: AppPermissionLevel,
+  permission: AppPermissionLevel
 ): Promise<{ success: boolean; error?: string }> {
   const supabase = getSupabaseClient();
 
@@ -83,7 +83,7 @@ export async function setMemberAppPermission(
       },
       {
         onConflict: "memberId,app",
-      },
+      }
     );
 
     if (error) {
@@ -104,7 +104,7 @@ export async function setMemberAppPermission(
  * Only org owners and admins can call this
  */
 export async function getOrganizationMembers(
-  organizationId: string,
+  organizationId: string
 ): Promise<MemberWithPermissions[]> {
   const supabase = getSupabaseClient();
 
@@ -125,7 +125,7 @@ export async function getOrganizationMembers(
         email,
         image
       )
-    `,
+    `
     )
     .eq("organizationId", organizationId)
     .returns<MemberRow[]>();
@@ -183,7 +183,7 @@ export async function checkUserAppPermission(
   userId: string,
   organizationId: string,
   app: AppName,
-  requiredPermission: AppPermissionLevel,
+  requiredPermission: AppPermissionLevel
 ): Promise<boolean> {
   const supabase = getSupabaseClient();
 
