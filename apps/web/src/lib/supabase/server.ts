@@ -1,6 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
-import type { Database } from "./types";
+import type { Database } from "@truss/ui/lib/supabase/types";
 
 /**
  * Create a Supabase client for server-side operations in Next.js
@@ -14,7 +14,7 @@ import type { Database } from "./types";
  *
  * Usage in Server Component:
  * ```tsx
- * import { getSupabaseServerClient } from '@repo/ui/lib/supabase/server'
+ * import { getSupabaseServerClient } from '@/lib/supabase/server'
  *
  * export default async function Page() {
  *   const supabase = await getSupabaseServerClient()
@@ -27,7 +27,7 @@ import type { Database } from "./types";
  * ```tsx
  * 'use server'
  *
- * import { getSupabaseServerClient } from '@repo/ui/lib/supabase/server'
+ * import { getSupabaseServerClient } from '@/lib/supabase/server'
  * import { revalidatePath } from 'next/cache'
  *
  * export async function createProject(formData: FormData) {
@@ -73,7 +73,7 @@ export async function getSupabaseServerClient() {
  *
  * Usage:
  * ```tsx
- * import { getSupabaseRouteHandlerClient } from '@repo/ui/lib/supabase/server'
+ * import { getSupabaseRouteHandlerClient } from '@/lib/supabase/server'
  *
  * export async function GET(request: Request) {
  *   const supabase = await getSupabaseRouteHandlerClient()
@@ -99,7 +99,7 @@ export async function getSupabaseRouteHandlerClient() {
  *
  * Usage:
  * ```tsx
- * import { getSupabaseAdminClient } from '@repo/ui/lib/supabase/server'
+ * import { getSupabaseAdminClient } from '@/lib/supabase/server'
  *
  * export async function adminDeleteUser(userId: string) {
  *   const supabase = getSupabaseAdminClient()

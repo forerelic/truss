@@ -8,7 +8,6 @@
     "./views/auth-test-view": "./src/views/auth-test-view.tsx",
     "./lib/utils": "./src/lib/utils.ts",
     "./lib/supabase/client": "./src/lib/supabase/client.ts",
-    "./lib/supabase/server": "./src/lib/supabase/server.ts",
     "./lib/supabase/types": "./src/lib/supabase/types.ts",
     "./lib/auth/server": "./src/lib/auth/server.ts",
     "./lib/auth/client": "./src/lib/auth/client.ts",
