@@ -3,7 +3,6 @@
   "ui": "tui",
   "cacheDir": ".turbo/cache",
   "envMode": "strict",
-  "telemetry": false,
   "globalDependencies": ["tsconfig.json", "package.json", "bun.lockb", "turbo.json", ".nvmrc"],
   "globalEnv": ["CI", "NODE_ENV"],
   "globalPassThroughEnv": [
