@@ -32,22 +32,16 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      - name: Setup NPM token
-        run: |
-          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
-
       - name: Create release PR or publish
         id: changesets
         uses: changesets/action@v1
         with:
-          publish: bun run changeset publish
           version: bun run changeset version
           commit: "chore: version packages"
           title: "chore: version packages"
           createGithubReleases: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Notify published packages
         if: steps.changesets.outputs.published == 'true'
