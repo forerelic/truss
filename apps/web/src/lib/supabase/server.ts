@@ -39,7 +39,9 @@ import type { Database } from "@truss/ui/lib/supabase/types";
  *
  * @returns Supabase server client with cookie-based session management
  */
-export async function getSupabaseServerClient() {
+export async function getSupabaseServerClient(): Promise<
+  ReturnType<typeof createServerClient<Database>>
+> {
   const cookieStore = await cookies();
 
   return createServerClient<Database>(
@@ -84,7 +86,9 @@ export async function getSupabaseServerClient() {
  *
  * @returns Supabase client for API routes
  */
-export async function getSupabaseRouteHandlerClient() {
+export async function getSupabaseRouteHandlerClient(): Promise<
+  ReturnType<typeof createServerClient<Database>>
+> {
   // Same implementation as server client - Next.js 15 uses cookies() everywhere
   return getSupabaseServerClient();
 }
@@ -109,7 +113,7 @@ export async function getSupabaseRouteHandlerClient() {
  *
  * @returns Supabase admin client (bypasses RLS)
  */
-export function getSupabaseAdminClient() {
+export function getSupabaseAdminClient(): ReturnType<typeof createServerClient<Database>> {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
