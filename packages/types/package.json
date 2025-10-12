@@ -1,0 +1,26 @@
+{
+  "name": "@truss/types",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./api": "./src/api.ts",
+    "./database": "./src/database.ts",
+    "./common": "./src/common.ts"
+  },
+  "scripts": {
+    "lint": "eslint . --max-warnings 0",
+    "check-types": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "@truss/database": "*"
+  },
+  "devDependencies": {
+    "@truss/eslint-config": "*",
+    "@truss/typescript-config": "*",
+    "@types/node": "^22.15.3",
+    "eslint": "^9.34.0",
+    "typescript": "5.9.2"
+  }
+}

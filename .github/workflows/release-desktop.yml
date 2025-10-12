@@ -1,0 +1,227 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "precision-v*"
+      - "momentum-v*"
+  workflow_dispatch:
+    inputs:
+      app:
+        description: "App to release"
+        type: choice
+        required: true
+        options:
+          - precision
+          - momentum
+      version:
+        description: "Version (e.g., 1.0.0)"
+        required: true
+      environment:
+        description: "Target environment"
+        type: choice
+        required: true
+        default: "production"
+        options:
+          - production
+          - staging
+
+permissions:
+  contents: write
+
+jobs:
+  setup:
+    name: Determine app
+    runs-on: ubuntu-latest
+    outputs:
+      app: ${{ steps.determine-app.outputs.app }}
+      app-name: ${{ steps.determine-app.outputs.app-name }}
+    steps:
+      - name: Determine app from tag or input
+        id: determine-app
+        run: |
+          if [ -n "${{ github.event.inputs.app }}" ]; then
+            APP="${{ github.event.inputs.app }}"
+          elif [[ "${{ github.ref_name }}" == precision-v* ]]; then
+            APP="precision"
+          elif [[ "${{ github.ref_name }}" == momentum-v* ]]; then
+            APP="momentum"
+          else
+            echo "Error: Could not determine app from tag: ${{ github.ref_name }}"
+            exit 1
+          fi
+
+          echo "app=$APP" >> $GITHUB_OUTPUT
+
+          if [ "$APP" == "precision" ]; then
+            echo "app-name=Precision" >> $GITHUB_OUTPUT
+          elif [ "$APP" == "momentum" ]; then
+            echo "app-name=Momentum" >> $GITHUB_OUTPUT
+          fi
+
+          echo "Building app: $APP"
+
+  build:
+    name: Build ${{ needs.setup.outputs.app-name }} (${{ matrix.name }})
+    needs: setup
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        include:
+          - platform: "macos-latest"
+            target: "aarch64-apple-darwin,x86_64-apple-darwin"
+            name: "macOS"
+            args: "--target aarch64-apple-darwin --target x86_64-apple-darwin"
+          - platform: "ubuntu-22.04"
+            target: "x86_64-unknown-linux-gnu"
+            name: "Linux"
+            args: ""
+          - platform: "windows-latest"
+            target: "x86_64-pc-windows-msvc"
+            name: "Windows"
+            args: ""
+
+    runs-on: ${{ matrix.platform }}
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Cache Rust dependencies
+        uses: swatinem/rust-cache@v2
+        with:
+          workspaces: "./apps/${{ needs.setup.outputs.app }}/src-tauri -> target"
+
+      - name: Install system dependencies
+        if: matrix.platform == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libgtk-3-dev \
+            libwebkit2gtk-4.1-dev \
+            libappindicator3-dev \
+            librsvg2-dev \
+            patchelf \
+            libssl-dev
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Import Apple certificates
+        if: matrix.platform == 'macos-latest' && env.APPLE_CERTIFICATE
+        env:
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+        run: |
+          CERTIFICATE_PATH=$RUNNER_TEMP/certificate.p12
+          KEYCHAIN_PATH=$RUNNER_TEMP/app-signing.keychain-db
+          KEYCHAIN_PASSWORD=$(openssl rand -base64 32)
+
+          echo -n "$APPLE_CERTIFICATE" | base64 --decode -o $CERTIFICATE_PATH
+
+          security create-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security set-keychain-settings -lut 21600 $KEYCHAIN_PATH
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security import $CERTIFICATE_PATH -P "$APPLE_CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k $KEYCHAIN_PATH
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -k "$KEYCHAIN_PASSWORD" $KEYCHAIN_PATH
+          security list-keychain -d user -s $KEYCHAIN_PATH
+
+      - name: Build application
+        uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
+          APPLE_API_KEY_PATH: ${{ secrets.APPLE_API_KEY_PATH }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          WINDOWS_CERTIFICATE: ${{ secrets.WINDOWS_CERTIFICATE }}
+          WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
+          VITE_APP_VERSION: ${{ github.ref_name }}
+          VITE_SUPABASE_URL: ${{ github.event.inputs.environment == 'staging' && secrets.STAGING_SUPABASE_URL || secrets.PRODUCTION_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ github.event.inputs.environment == 'staging' && secrets.STAGING_SUPABASE_ANON_KEY || secrets.PRODUCTION_SUPABASE_ANON_KEY }}
+          VITE_BETTER_AUTH_URL: ${{ github.event.inputs.environment == 'staging' && secrets.STAGING_WEB_URL || secrets.NEXT_PUBLIC_APP_URL }}
+        with:
+          projectPath: apps/${{ needs.setup.outputs.app }}
+          args: ${{ matrix.args }}
+          tagName: ${{ github.ref_name }}
+          releaseName: ${{ needs.setup.outputs.app-name }} v${{ github.event.inputs.version || github.ref_name }}
+          releaseBody: |
+            See the full changelog at [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/apps/${{ needs.setup.outputs.app }}/CHANGELOG.md)
+
+            ## Installation
+
+            - **macOS**: Download the `.dmg` file and drag to Applications
+            - **Windows**: Download the `.exe` installer (NSIS) or `.msi` (Windows Installer)
+            - **Linux**: Download the `.AppImage`, `.deb`, or `.rpm` package
+
+            ## Auto-Updates
+
+            This version includes auto-update support. The app will check for updates automatically.
+
+            ## Verification
+
+            All releases are signed. You can verify signatures using the public key available in our repository.
+          releaseDraft: false
+          prerelease: ${{ contains(github.ref_name, 'beta') || contains(github.ref_name, 'alpha') || contains(github.ref_name, 'rc') }}
+          includeUpdaterJson: true
+          updaterJsonPreferNsis: true
+
+  homebrew:
+    name: Update Homebrew formula
+    runs-on: ubuntu-latest
+    needs: [setup, build]
+    if: success() && !contains(github.ref_name, 'beta') && !contains(github.ref_name, 'alpha')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Update formula
+        env:
+          HOMEBREW_GITHUB_TOKEN: ${{ secrets.HOMEBREW_GITHUB_TOKEN }}
+        run: |
+          echo "Homebrew formula update would go here"
+
+  announce:
+    name: Announce release
+    runs-on: ubuntu-latest
+    needs: [setup, build]
+    if: success()
+
+    steps:
+      - name: Send Discord notification
+        if: env.DISCORD_WEBHOOK
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+        run: |
+          curl -H "Content-Type: application/json" \
+            -d "{\"content\": \"New release: ${{ needs.setup.outputs.app-name }} ${{ github.ref_name }}\\n\\nDownload: https://github.com/${{ github.repository }}/releases/tag/${{ github.ref_name }}\"}" \
+            $DISCORD_WEBHOOK
+
+      - name: Tweet release
+        if: env.TWITTER_API_KEY
+        env:
+          TWITTER_API_KEY: ${{ secrets.TWITTER_API_KEY }}
+        run: |
+          echo "Twitter announcement would go here"

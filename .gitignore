@@ -1,0 +1,193 @@
+# ==============================================
+# Truss Monorepo - Git Ignore Configuration
+# ==============================================
+# Silicon Valley standard .gitignore for 2025
+# Turborepo + Tauri + Next.js + Supabase
+
+# ==============================================
+# Dependencies
+# ==============================================
+node_modules/
+.pnp
+.pnp.js
+.yarn/install-state.gz
+bun.lockb
+
+# ==============================================
+# Environment Variables
+# ==============================================
+# CRITICAL: Never commit real credentials
+.env
+.env.local
+.env.*.local
+.env.development
+.env.test
+.env.production
+.env.staging
+
+# Only allow .env.example files
+!.env.example
+!apps/*/.env.example
+
+# ==============================================
+# Build Outputs
+# ==============================================
+dist/
+build/
+out/
+.next/
+*.tsbuildinfo
+.vercel
+
+# ==============================================
+# Turborepo
+# ==============================================
+.turbo/
+turbo-*.log
+
+# ==============================================
+# Tauri
+# ==============================================
+apps/*/src-tauri/target/
+apps/*/src-tauri/WixTools/
+apps/*/src-tauri/Cargo.lock
+
+# ==============================================
+# Supabase
+# ==============================================
+supabase/.temp/
+supabase/.branches/
+.supabase/
+
+# ==============================================
+# Testing & Coverage
+# ==============================================
+coverage/
+*.lcov
+.nyc_output/
+test-results/
+playwright-report/
+playwright/.cache/
+
+# ==============================================
+# Logs
+# ==============================================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ==============================================
+# OS Files
+# ==============================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# ==============================================
+# Editor & IDE
+# ==============================================
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+
+# ==============================================
+# Temporary Files
+# ==============================================
+tmp/
+temp/
+.tmp/
+*.tmp
+*.temp
+.cache/
+
+# ==============================================
+# Security & Credentials
+# ==============================================
+*.pem
+*.key
+*.cert
+*.crt
+*.p12
+*.pfx
+private/
+secrets/
+
+# ==============================================
+# Database
+# ==============================================
+*.sqlite
+*.sqlite3
+*.db
+*.db-journal
+
+# ==============================================
+# Release Artifacts
+# ==============================================
+releases/
+*.dmg
+*.exe
+*.deb
+*.rpm
+*.AppImage
+*.snap
+*.msi
+*.pkg
+*.tar.gz
+*.zip
+
+# ==============================================
+# Bundle Analysis
+# ==============================================
+.webpack-bundle-analyzer/
+stats.json
+bundle-stats.html
+
+# ==============================================
+# Auth
+# ==============================================
+auth.bin
+
+# ==============================================
+# Changesets
+# ==============================================
+.changeset/.cache
+.changeset/.temp
+
+# ==============================================
+# GitHub Copilot
+# ==============================================
+.copilot/
+
+# ==============================================
+# Local History (VS Code)
+# ==============================================
+.history/
+.vscode-test/
+
+# ==============================================
+# Misc
+# ==============================================
+*.orig
+.eslintcache
+.stylelintcache
+.prettiercache

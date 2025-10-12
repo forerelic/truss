@@ -1,0 +1,88 @@
+version: 2
+updates:
+  # ==============================================
+  # JavaScript/TypeScript Dependencies
+  # ==============================================
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/Los_Angeles"
+    open-pull-requests-limit: 10
+    groups:
+      production-dependencies:
+        dependency-type: "production"
+        update-types:
+          - "minor"
+          - "patch"
+      development-dependencies:
+        dependency-type: "development"
+        update-types:
+          - "minor"
+          - "patch"
+    assignees:
+      - "forerelic"
+    labels:
+      - "dependencies"
+      - "javascript"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+  # ==============================================
+  # Rust Dependencies (Tauri)
+  # ==============================================
+  - package-ecosystem: "cargo"
+    directory: "/apps/precision/src-tauri"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/Los_Angeles"
+    open-pull-requests-limit: 5
+    assignees:
+      - "forerelic"
+    labels:
+      - "dependencies"
+      - "rust"
+      - "precision"
+    commit-message:
+      prefix: "chore(precision)"
+
+  - package-ecosystem: "cargo"
+    directory: "/apps/momentum/src-tauri"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/Los_Angeles"
+    open-pull-requests-limit: 5
+    assignees:
+      - "forerelic"
+    labels:
+      - "dependencies"
+      - "rust"
+      - "momentum"
+    commit-message:
+      prefix: "chore(momentum)"
+
+  # ==============================================
+  # GitHub Actions
+  # ==============================================
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/Los_Angeles"
+    open-pull-requests-limit: 5
+    assignees:
+      - "forerelic"
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "ci"

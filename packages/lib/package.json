@@ -1,0 +1,25 @@
+{
+  "name": "@truss/lib",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./date": "./src/date.ts",
+    "./string": "./src/string.ts",
+    "./validation": "./src/validation.ts",
+    "./platform": "./src/platform.ts",
+    "./utils": "./src/utils.ts"
+  },
+  "scripts": {
+    "lint": "eslint . --max-warnings 0",
+    "check-types": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@truss/eslint-config": "*",
+    "@truss/typescript-config": "*",
+    "@types/node": "^22.15.3",
+    "eslint": "^9.34.0",
+    "typescript": "5.9.2"
+  }
+}

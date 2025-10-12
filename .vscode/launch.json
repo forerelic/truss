@@ -1,0 +1,41 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug Precision (Rust + Frontend)",
+      "cargo": {
+        "args": [
+          "build",
+          "--manifest-path=./apps/precision/src-tauri/Cargo.toml",
+          "--no-default-features"
+        ]
+      },
+      "preLaunchTask": "precision:dev"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug Momentum (Rust + Frontend)",
+      "cargo": {
+        "args": [
+          "build",
+          "--manifest-path=./apps/momentum/src-tauri/Cargo.toml",
+          "--no-default-features"
+        ]
+      },
+      "preLaunchTask": "momentum:dev"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Debug Web Backend (Next.js)",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": ["run", "dev"],
+      "cwd": "${workspaceFolder}/apps/web",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    }
+  ]
+}

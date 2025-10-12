@@ -1,0 +1,34 @@
+{
+  "name": "@truss/features",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./organizations": "./src/organizations/index.ts",
+    "./organizations/types": "./src/organizations/types.ts",
+    "./organizations/permissions": "./src/organizations/permissions.ts",
+    "./organizations/utils": "./src/organizations/utils.ts",
+    "./organizations/workspace-context": "./src/organizations/workspace-context.tsx"
+  },
+  "scripts": {
+    "lint": "eslint . --max-warnings 0",
+    "check-types": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "@truss/auth": "*",
+    "@truss/config": "*",
+    "@truss/database": "*",
+    "@truss/lib": "*",
+    "@truss/types": "*",
+    "react": "^19.1.0"
+  },
+  "devDependencies": {
+    "@truss/eslint-config": "*",
+    "@truss/typescript-config": "*",
+    "@types/node": "^22.15.3",
+    "@types/react": "19.1.0",
+    "eslint": "^9.34.0",
+    "typescript": "5.9.2"
+  }
+}

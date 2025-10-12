@@ -1,0 +1,16 @@
+{
+  "extends": "@truss/typescript-config/react-library.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    // Disabled for Better Auth plugin compatibility
+    // Better Auth uses internal types that can't be referenced in declarations
+    // This is acceptable for JIT internal packages (Turborepo best practice)
+    "declaration": false,
+    "declarationMap": false
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules", "dist"]
+}

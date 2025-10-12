@@ -1,0 +1,50 @@
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+bun.lockb
+
+# Build outputs
+dist
+build
+out
+.next
+.turbo
+*.tsbuildinfo
+
+# Tauri
+apps/*/src-tauri/target/
+apps/*/src-tauri/Cargo.lock
+
+# Generated files
+*.min.*
+*.min.css
+*.min.js
+packages/ui/src/lib/supabase/types.ts
+**/database.types.ts
+
+# Supabase
+.supabase
+supabase/.temp
+supabase/.branches
+
+# Coverage
+coverage
+
+# OS
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Vercel
+.vercel
+
+# Environment files
+.env
+.env.*
+!.env.example
+!.env*.example

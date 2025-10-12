@@ -1,0 +1,100 @@
+name: Changesets
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release:
+    name: Version and publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Create release PR or publish
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          version: bun run changeset version
+          commit: "chore: version packages"
+          title: "chore: version packages"
+          createGithubReleases: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Notify published packages
+        if: steps.changesets.outputs.published == 'true'
+        run: |
+          echo "### Published Packages" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "The following packages were published:" >> $GITHUB_STEP_SUMMARY
+          echo "${{ steps.changesets.outputs.publishedPackages }}" >> $GITHUB_STEP_SUMMARY
+
+      - name: Sync tags
+        if: steps.changesets.outputs.published == 'true'
+        run: |
+          git fetch --tags
+          for package in $(echo '${{ steps.changesets.outputs.publishedPackages }}' | jq -r '.[] | .name'); do
+            version=$(echo '${{ steps.changesets.outputs.publishedPackages }}' | jq -r ".[] | select(.name == \"$package\") | .version")
+            tag="${package}@${version}"
+            if ! git tag -l | grep -q "^${tag}$"; then
+              git tag -a "${tag}" -m "Release ${package}@${version}"
+              git push origin "${tag}"
+            fi
+          done
+
+      - name: Trigger desktop releases
+        if: steps.changesets.outputs.published == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const packages = JSON.parse('${{ steps.changesets.outputs.publishedPackages }}');
+
+            for (const pkg of packages) {
+              if (pkg.name === '@truss/precision') {
+                await github.rest.actions.createWorkflowDispatch({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  workflow_id: 'release-desktop.yml',
+                  ref: 'main',
+                  inputs: {
+                    app: 'precision',
+                    version: pkg.version
+                  }
+                });
+              }
+
+              if (pkg.name === '@truss/momentum') {
+                await github.rest.actions.createWorkflowDispatch({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  workflow_id: 'release-desktop.yml',
+                  ref: 'main',
+                  inputs: {
+                    app: 'momentum',
+                    version: pkg.version
+                  }
+                });
+              }
+            }

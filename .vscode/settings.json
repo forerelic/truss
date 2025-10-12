@@ -1,0 +1,26 @@
+{
+  // Suppress CSS lint warnings for Tailwind CSS v4 at-rules
+  "css.lint.unknownAtRules": "ignore",
+
+  // Associate CSS files with Tailwind CSS for better IntelliSense
+  "files.associations": {
+    "*.css": "tailwindcss"
+  },
+
+  // Enable Tailwind CSS IntelliSense
+  "tailwindCSS.experimental.classRegex": [
+    ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
+    ["cx\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"]
+  ],
+
+  // Editor settings for better DX
+  "editor.quickSuggestions": {
+    "strings": true
+  },
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+
+  // TypeScript settings
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true
+}
