@@ -11,7 +11,7 @@ node_modules/
 .pnp
 .pnp.js
 .yarn/install-state.gz
-bun.lockb
+bun.lockb        # Legacy binary lockfile (we use bun.lock text format)
 
 # ==============================================
 # Environment Variables
