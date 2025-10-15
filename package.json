@@ -66,13 +66,13 @@
     "@changesets/cli": "^2.29.7",
     "@types/pg": "^8.15.5",
     "concurrently": "^9.2.1",
-    "esbuild": "~0.25.10",
+    "esbuild": "~0.25.11",
     "husky": "^9.1.7",
-    "lint-staged": "^16.2.3",
+    "lint-staged": "^16.2.4",
     "prettier": "^3.6.2",
-    "supabase": "^2.48.3",
+    "supabase": "^2.51.0",
     "turbo": "^2.5.8",
-    "typescript": "5.9.2",
+    "typescript": "5.9.3",
     "wait-on": "^9.0.1"
   },
   "engines": {
