@@ -1,9 +1,9 @@
 version: 2
 updates:
   # ==============================================
-  # JavaScript/TypeScript Dependencies
+  # JavaScript/TypeScript Dependencies (Bun)
   # ==============================================
-  - package-ecosystem: "npm"
+  - package-ecosystem: "bun"
     directory: "/"
     schedule:
       interval: "weekly"

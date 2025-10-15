@@ -208,7 +208,7 @@ scripts/      - Automation scripts
 - **Desktop**: Tauri v2 + React 19 + Vite
 - **Database**: Supabase Postgres (Better Auth tables)
 - **Build**: Turborepo with remote caching
-- **Package Manager**: Bun 1.2.4+
+- **Package Manager**: Bun 1.3.0+
 - **Styling**: Tailwind CSS v4 (design tokens)
 
 ### Deployment Pipeline
@@ -299,7 +299,7 @@ git commit -m "chore: add changeset"
 
 ### Required Tools
 
-- Bun 1.2.4+ (`curl -fsSL https://bun.sh/install | bash`)
+- Bun 1.3.0+ (`curl -fsSL https://bun.sh/install | bash`)
 - Supabase CLI (`brew install supabase/tap/supabase`)
 - Node.js v20.11.0 (see `.nvmrc`)
 
