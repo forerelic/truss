@@ -1,35 +1,46 @@
 import { useBetterAuthTauri } from "@daveyplate/better-auth-tauri/react";
-import { tauriAuthClient, useSession } from "@truss/auth/client/tauri";
+import { tauriAuthClient, useSession, signOut } from "./lib/auth-client";
+import { WorkspaceProvider } from "@truss/features/organizations/workspace-context";
+import { AppShell, AuthScreen } from "@truss/features";
 import { Card, CardContent, CardHeader, CardTitle } from "@truss/ui/components/card";
 import { Button } from "@truss/ui/components/button";
+import { momentumShellConfig } from "./config/shell-config";
+import { Play, Pause, Clock } from "lucide-react";
 
 function App() {
-  // Set up Better Auth Tauri deep link handler
-  // This enables OAuth flows (GitHub, Google) to work in the desktop app
-  // The hook handles initialization internally, no need for useRef
+  // Handle OAuth deep links for Tauri
   useBetterAuthTauri({
     authClient: tauriAuthClient,
-    scheme: "truss", // Must match tauri.conf.json
-    debugLogs: import.meta.env.DEV,
-    onRequest: (href) => {
-      console.log("[Auth] OAuth request initiated:", href);
-    },
-    onSuccess: (callbackURL) => {
-      console.log("[Auth] ✅ Authentication successful!");
-      // Navigate to callback URL or dashboard
-      // navigate(callbackURL || '/dashboard')
-    },
-    onError: (error) => {
-      console.error("[Auth] ❌ Authentication failed:", error);
-      // Show user-friendly error notification
-    },
+    scheme: "truss",
+    debugLogs: false,
+    onRequest: () => {},
+    onSuccess: () => {},
+    onError: () => {},
   });
 
-  return <MomentumApp />;
+  return (
+    <WorkspaceProvider>
+      <MomentumApp />
+    </WorkspaceProvider>
+  );
 }
 
 function MomentumApp() {
   const { data: session, isPending } = useSession();
+
+  const handleLogout = async () => {
+    await signOut({
+      fetchOptions: {
+        onSuccess: () => {
+          // Session will automatically update and trigger re-render
+          console.log("Successfully logged out");
+        },
+        onError: (error) => {
+          console.error("Failed to logout:", error);
+        },
+      },
+    });
+  };
 
   if (isPending) {
     return (
@@ -43,60 +54,162 @@ function MomentumApp() {
   }
 
   if (!session?.user) {
-    return <AuthView />;
+    return (
+      <AuthScreen
+        appName="Momentum"
+        appDescription="Project tracking and progress management for construction teams"
+        onSuccess={() => {
+          // Session hook will automatically update and re-render
+        }}
+      />
+    );
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <AppShell
+      config={momentumShellConfig}
+      onCommandExecute={(commandId) => {}}
+      onLogout={handleLogout}
+    >
       <DashboardView user={session.user} />
-    </div>
+    </AppShell>
   );
 }
 
-function AuthView() {
-  const handleSignIn = async () => {
-    // Use Better Auth sign in methods
-    // Example: await signIn.social({ provider: 'github' })
-    console.log("Sign in clicked - implement auth flow");
-  };
+function DashboardView({ user }: { user: { name?: string; email: string } }) {
+  // Mock timer state - pending real state management
+  const isTimerRunning = false;
+  const currentTime = "00:00:00";
+  const currentProject = "Office Renovation";
+  const currentTask = "Review blueprints";
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-background p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-2xl text-center">Welcome to Momentum</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-center text-muted-foreground">
-            Project tracking and progress management for construction teams.
+    <>
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Welcome back, {user.name || user.email}!
+          </h1>
+          <p className="text-muted-foreground">
+            Track your time, manage tasks, and monitor project progress.
           </p>
-          <Button onClick={handleSignIn} className="w-full" size="lg">
-            Sign In
-          </Button>
-          <p className="text-xs text-center text-muted-foreground">
-            Part of the MCP Suite by Forerelic
-          </p>
-        </CardContent>
-      </Card>
-    </div>
-  );
-}
+        </div>
 
-function DashboardView({ user }: { user: any }) {
-  return (
-    <div className="container mx-auto p-8">
-      <Card>
-        <CardHeader>
-          <CardTitle>Momentum Dashboard</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground mb-4">Welcome back, {user.name || user.email}!</p>
-          <p className="text-sm text-muted-foreground">
-            🚧 Dashboard under construction. Start building your project tracking features here.
-          </p>
-        </CardContent>
-      </Card>
-    </div>
+        {/* Timer Widget */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Clock className="h-5 w-5" />
+              Current Timer
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="text-center">
+                <div className="text-4xl font-mono font-bold">{currentTime}</div>
+                {isTimerRunning && (
+                  <div className="mt-2 space-y-1">
+                    <p className="text-sm font-medium">{currentProject}</p>
+                    <p className="text-xs text-muted-foreground">{currentTask}</p>
+                  </div>
+                )}
+              </div>
+              <div className="flex gap-2 justify-center">
+                <Button
+                  size="lg"
+                  onClick={() => document.dispatchEvent(new CustomEvent("start-timer"))}
+                  disabled={isTimerRunning}
+                >
+                  <Play className="mr-2 h-4 w-4" />
+                  Start
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  onClick={() => document.dispatchEvent(new CustomEvent("pause-timer"))}
+                  disabled={!isTimerRunning}
+                >
+                  <Pause className="mr-2 h-4 w-4" />
+                  Pause
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Stats Grid */}
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm font-medium">Today's Hours</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">6.5</div>
+              <p className="text-xs text-muted-foreground">1.5 hours remaining</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm font-medium">This Week</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">32.5h</div>
+              <p className="text-xs text-muted-foreground">7.5 hours to goal</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm font-medium">Active Tasks</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">14</div>
+              <p className="text-xs text-muted-foreground">3 due today</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm font-medium">Team Activity</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">8</div>
+              <p className="text-xs text-muted-foreground">Team members online</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Recent Activity */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Recent Time Entries</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">
+              Your recent time entries will appear here. Use the timer above to start tracking your
+              work.
+            </p>
+          </CardContent>
+        </Card>
+
+        {/* Quick Actions */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Quick Actions</CardTitle>
+          </CardHeader>
+          <CardContent className="flex gap-2">
+            <Button onClick={() => (window.location.href = "/entries/new")}>New Entry</Button>
+            <Button variant="outline" onClick={() => (window.location.href = "/tasks")}>
+              View Tasks
+            </Button>
+            <Button variant="outline" onClick={() => (window.location.href = "/reports")}>
+              Generate Report
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    </>
   );
 }
 

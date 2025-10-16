@@ -1,6 +1,11 @@
 @import "tailwindcss";
+
+/* Scan both UI and Features packages for Tailwind classes */
 @source "../../../packages/ui/src/**/*.{ts,tsx}";
+@source "../../../packages/features/src/**/*.{ts,tsx}";
+
+/* Import theme tokens and CSS variables */
 @import "@truss/ui/styles/theme.css";
 
-/* (Optional) v4 plugin usage */
+/* Animation utilities plugin */
 @plugin "tailwindcss-animate";

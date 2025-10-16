@@ -7,7 +7,6 @@
     ".": "./src/index.ts",
     "./server": "./src/server.ts",
     "./client": "./src/client/index.ts",
-    "./client/web": "./src/client/web.ts",
     "./client/tauri": "./src/client/tauri.ts"
   },
   "scripts": {
@@ -30,6 +29,7 @@
     "@types/pg": "^8.15.5",
     "@types/react": "19.2.2",
     "eslint": "^9.34.0",
-    "typescript": "5.9.3"
+    "typescript": "5.9.3",
+    "vite": "^7.1.10"
   }
 }
