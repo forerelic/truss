@@ -59,16 +59,16 @@ export function StatusBar() {
 
   return (
     <TooltipProvider delayDuration={200}>
-      <div className="status-bar h-6 border-t bg-background/95 backdrop-blur-sm px-2 flex items-center justify-between text-xs text-muted-foreground transition-all duration-150">
+      <div className="status-bar h-7 border-t bg-background/95 backdrop-blur-sm px-3 flex items-center justify-between text-xs text-muted-foreground transition-all duration-150">
         {/* Left Section */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           {/* Connection Status */}
           <ConnectionIndicator status={connectionStatus} />
 
-          <Separator orientation="vertical" className="h-3" />
+          <Separator orientation="vertical" className="h-3.5" />
 
           {/* Workspace Info */}
-          <button className="flex items-center gap-1 px-1.5 py-0.5 rounded-sm hover:bg-accent/50 active:bg-accent transition-all duration-150 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
+          <button className="flex items-center gap-1.5 px-2 py-1 rounded-sm hover:bg-accent/50 active:bg-accent transition-all duration-150 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
             <span className="font-medium text-[10px]">
               {workspace?.organization_name || "Personal"}
             </span>
@@ -79,7 +79,7 @@ export function StatusBar() {
             )}
           </button>
 
-          <Separator orientation="vertical" className="h-3" />
+          <Separator orientation="vertical" className="h-3.5" />
 
           {/* Sync Status */}
           <SyncIndicator status={syncStatus} />
@@ -97,7 +97,7 @@ export function StatusBar() {
         </div>
 
         {/* Right Section */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           {/* Command Palette Hint */}
           <Tooltip>
             <TooltipTrigger asChild>
@@ -124,10 +124,10 @@ export function StatusBar() {
             </TooltipContent>
           </Tooltip>
 
-          <Separator orientation="vertical" className="h-3" />
+          <Separator orientation="vertical" className="h-3.5" />
 
           {/* Time */}
-          <span className="tabular-nums">
+          <span className="tabular-nums text-[10px] font-medium">
             {time.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
           </span>
         </div>

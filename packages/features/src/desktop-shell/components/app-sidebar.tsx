@@ -50,8 +50,8 @@ export function AppSidebar({ config, onLogout }: AppSidebarProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
   return (
-    <Sidebar className="border-r transition-all duration-200">
-      <SidebarHeader className="border-b">
+    <Sidebar className="border-r transition-all duration-200 ease-out">
+      <SidebarHeader className="border-b px-3 py-3">
         {/* Workspace Switcher */}
         {config.features?.workspaceSwitcher !== false && (
           <WorkspaceSwitcher appName={config.app.name} appIcon={config.app.icon} />
@@ -59,14 +59,14 @@ export function AppSidebar({ config, onLogout }: AppSidebarProps) {
 
         {/* Search (only visible when expanded) */}
         {!sidebarCollapsed && config.features?.globalSearch !== false && (
-          <div className="px-3 pb-3 pt-2">
+          <div className="px-0 pb-2 pt-2">
             <div className="relative group">
-              <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground transition-colors group-focus-within:text-foreground" />
+              <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground transition-colors duration-150 group-focus-within:text-foreground" />
               <Input
                 placeholder="Search..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 h-9 bg-sidebar-accent/50 border-sidebar-border hover:bg-sidebar-accent focus-visible:bg-background transition-all duration-150"
+                className="pl-9 h-10 bg-sidebar-accent/50 border-sidebar-border hover:bg-sidebar-accent focus-visible:bg-background transition-all duration-200"
               />
             </div>
           </div>

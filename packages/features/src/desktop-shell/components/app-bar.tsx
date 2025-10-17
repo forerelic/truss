@@ -92,9 +92,9 @@ export function AppBar({
       <div
         className={cn(
           "app-bar",
-          "h-12 border-b bg-background",
+          "h-12 border-b bg-background/95 backdrop-blur-sm",
           "flex items-center justify-between",
-          "px-4 gap-4",
+          "px-4 gap-3",
           "transition-colors duration-150",
           className
         )}
@@ -104,19 +104,21 @@ export function AppBar({
         <div className="flex-1 min-w-0">
           {breadcrumbs.length > 0 ? (
             <Breadcrumb>
-              <BreadcrumbList>
+              <BreadcrumbList className="gap-1.5">
                 {breadcrumbs.map((segment, index) => {
                   const isLast = index === breadcrumbs.length - 1;
 
                   return (
-                    <div key={index} className="flex items-center">
+                    <div key={index} className="flex items-center gap-1.5">
                       <BreadcrumbItem>
                         {segment.isCurrent || isLast ? (
-                          <BreadcrumbPage className="font-medium">{segment.label}</BreadcrumbPage>
+                          <BreadcrumbPage className="font-medium text-foreground">
+                            {segment.label}
+                          </BreadcrumbPage>
                         ) : (
                           <BreadcrumbLink
                             href={segment.href}
-                            className="hover:text-foreground transition-colors"
+                            className="text-muted-foreground hover:text-foreground transition-colors duration-150"
                           >
                             {segment.label}
                           </BreadcrumbLink>
@@ -124,7 +126,7 @@ export function AppBar({
                       </BreadcrumbItem>
                       {!isLast && (
                         <BreadcrumbSeparator>
-                          <ChevronRight className="h-4 w-4" />
+                          <ChevronRight className="h-3.5 w-3.5 text-muted-foreground/50" />
                         </BreadcrumbSeparator>
                       )}
                     </div>
@@ -132,9 +134,7 @@ export function AppBar({
                 })}
               </BreadcrumbList>
             </Breadcrumb>
-          ) : (
-            <div className="text-sm text-muted-foreground">No breadcrumbs</div>
-          )}
+          ) : null}
         </div>
 
         {/* Right: Actions */}

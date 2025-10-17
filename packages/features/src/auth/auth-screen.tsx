@@ -129,35 +129,35 @@ export function AuthScreen({ onSuccess, appName, appDescription }: AuthScreenPro
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-background via-background to-muted/20 p-8">
-      <div className="w-full max-w-[420px]">
+      <div className="w-full max-w-[440px]">
         {/* Logo and app info */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-primary/10 mb-4">
-            <div className="w-8 h-8 rounded-lg bg-primary" />
+        <div className="text-center mb-10">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-primary/10 mb-5 transition-transform hover:scale-105 duration-300">
+            <div className="w-10 h-10 rounded-xl bg-primary shadow-lg" />
           </div>
           <h1 className="text-2xl font-bold tracking-tight">{appName}</h1>
-          <p className="text-sm text-muted-foreground mt-1">{appDescription}</p>
+          <p className="text-sm text-muted-foreground mt-2 max-w-sm mx-auto">{appDescription}</p>
         </div>
 
         {/* Auth card */}
         <div
           className={cn(
-            "bg-card border rounded-xl shadow-xl p-6 transition-all duration-300",
+            "bg-card border rounded-xl shadow-2xl p-8 transition-all duration-300",
             isTransitioning && "scale-[0.98] opacity-90"
           )}
         >
-          <div className="mb-6">
-            <h2 className="text-lg font-semibold">
+          <div className="mb-8">
+            <h2 className="text-xl font-semibold">
               {mode === "signin" ? "Welcome back" : "Create your account"}
             </h2>
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className="text-sm text-muted-foreground mt-2">
               {mode === "signin"
                 ? "Sign in to continue to your workspace"
                 : "Get started with your free account"}
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-5">
             {/* Name field (signup only) */}
             {mode === "signup" && (
               <div
@@ -174,7 +174,7 @@ export function AuthScreen({ onSuccess, appName, appDescription }: AuthScreenPro
                   onChange={(e) => setName(e.target.value)}
                   placeholder="John Doe"
                   disabled={isLoading}
-                  className="h-10"
+                  className="h-11"
                   autoComplete="name"
                   required={mode === "signup"}
                 />
@@ -191,7 +191,7 @@ export function AuthScreen({ onSuccess, appName, appDescription }: AuthScreenPro
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@company.com"
                 disabled={isLoading}
-                className="h-10"
+                className="h-11"
                 autoComplete="email"
                 required
                 autoFocus={mode === "signin"}
@@ -213,7 +213,7 @@ export function AuthScreen({ onSuccess, appName, appDescription }: AuthScreenPro
                     mode === "signin" ? "Enter your password" : "Choose a strong password"
                   }
                   disabled={isLoading}
-                  className="h-10 pr-10"
+                  className="h-11 pr-11"
                   autoComplete={mode === "signin" ? "current-password" : "new-password"}
                   required
                 />
@@ -221,7 +221,7 @@ export function AuthScreen({ onSuccess, appName, appDescription }: AuthScreenPro
                   type="button"
                   variant="ghost"
                   size="sm"
-                  className="absolute right-0 top-0 h-10 px-3 hover:bg-transparent"
+                  className="absolute right-0 top-0 h-11 w-11 px-0 hover:bg-transparent"
                   onClick={() => setShowPassword(!showPassword)}
                   tabIndex={-1}
                 >
@@ -339,7 +339,7 @@ export function AuthScreen({ onSuccess, appName, appDescription }: AuthScreenPro
             {/* Submit button */}
             <Button
               type="submit"
-              className="w-full h-10 font-medium"
+              className="w-full h-11 font-medium text-base"
               disabled={isLoading || (mode === "signup" && !isPasswordValid)}
             >
               {isLoading ? (

@@ -120,7 +120,9 @@ export function ThreeColumnLayout({
             {/* Detail/Main Content Panel */}
             <ResizablePanel defaultSize={detailSize} minSize={30} className="detail-panel">
               <ScrollArea className="h-full w-full">
-                <div className="p-6">{children}</div>
+                <div className="flex justify-center w-full">
+                  <div className="w-full max-w-[1200px] p-6 md:p-8">{children}</div>
+                </div>
               </ScrollArea>
             </ResizablePanel>
           </ResizablePanelGroup>
