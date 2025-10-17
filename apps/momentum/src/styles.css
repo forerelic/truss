@@ -1,11 +1,136 @@
+/**
+ * Momentum App - Main Stylesheet
+ *
+ * Tailwind v4 CSS-First Configuration for Momentum Desktop App.
+ *
+ * Architecture:
+ * 1. Import Tailwind CSS
+ * 2. Configure source scanning for both UI and Features packages
+ * 3. Import theme variables from @truss/ui (includes Momentum brand theme)
+ * 4. Define @theme inline mappings for Tailwind utilities
+ * 5. Apply base styles
+ *
+ * The Momentum theme (purple brand) is automatically applied via data-app="momentum"
+ * attribute on the HTML element.
+ *
+ * @see /packages/ui/src/styles/themes/momentum.css - Brand theme
+ * @see /packages/ui/src/styles/theme.css - Base theme
+ * @see https://tailwindcss.com/docs/theme
+ */
+
+/* Import Tailwind CSS core */
 @import "tailwindcss";
 
-/* Scan both UI and Features packages for Tailwind classes */
+/**
+ * Source Scanning Configuration
+ *
+ * Tells Tailwind where to scan for utility classes.
+ * Includes both UI package and Features package components.
+ */
 @source "../../../packages/ui/src/**/*.{ts,tsx}";
 @source "../../../packages/features/src/**/*.{ts,tsx}";
 
-/* Import theme tokens and CSS variables */
-@import "@truss/ui/styles/theme.css";
-
-/* Animation utilities plugin */
+/**
+ * Animation Utilities Plugin
+ *
+ * Enables animation utilities for transitions and keyframe animations.
+ * Required for shadcn/ui components with animations.
+ */
 @plugin "tailwindcss-animate";
+
+/**
+ * Import Theme Variables
+ *
+ * Imports all CSS custom properties from the UI package:
+ * - Base theme (neutral OKLCH tokens)
+ * - Momentum theme (purple brand overrides)
+ * - Precision theme (teal brand - ignored via data-app)
+ * - Shared sidebar variables
+ */
+@import "@truss/ui/styles/globals.css";
+
+/**
+ * Tailwind v4 @theme Directive
+ *
+ * Maps CSS custom properties to Tailwind utilities using the inline option.
+ * The "inline" flag allows referencing other CSS variables (var()) in the theme.
+ *
+ * This enables utilities like:
+ * - bg-background, text-foreground
+ * - bg-primary, text-primary-foreground
+ * - rounded-lg, rounded-md, rounded-sm
+ * - bg-sidebar, text-sidebar-foreground
+ *
+ * @see https://tailwindcss.com/docs/theme#using-css-variables
+ */
+@theme inline {
+  /* Surface Colors */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+
+  /* Brand & Accent Colors */
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
+  /* Semantic Colors */
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+
+  /* UI Element Colors */
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Border Radius Scale */
+  --radius: var(--radius);
+  --radius-lg: var(--radius-lg);
+  --radius-md: var(--radius-md);
+  --radius-sm: var(--radius-sm);
+
+  /* Sidebar Colors */
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+/**
+ * Base Layer Styles
+ *
+ * Applied to all elements for consistent theming.
+ * Uses Tailwind's @apply directive for clean, maintainable styles.
+ *
+ * - All elements: border-border for consistent borders, outline-ring for focus states
+ * - Body: background and foreground colors from theme
+ *
+ * Note on Scrollbars:
+ * ------------------
+ * Custom scrollbars are implemented via the ScrollArea component from @truss/ui.
+ * Native webkit scrollbar CSS (::-webkit-scrollbar-*) does NOT work in Tauri's
+ * WKWebView on macOS. Use the ScrollArea component for cross-platform compatibility.
+ *
+ * @see /packages/ui/src/components/scroll-area.tsx
+ */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}

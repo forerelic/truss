@@ -52,6 +52,16 @@ export function AppShell({
   // Initialize keyboard shortcuts from config
   const initialShortcuts = config.shortcuts || [];
 
+  // Set data-app attribute on document root for app-specific theming
+  useEffect(() => {
+    const appName = config.app.name.toLowerCase().replace(/\s+/g, "-");
+    document.documentElement.setAttribute("data-app", appName);
+
+    return () => {
+      document.documentElement.removeAttribute("data-app");
+    };
+  }, [config.app.name]);
+
   return (
     <ShellProvider config={config}>
       <ThemeProvider defaultTheme={config.theme?.mode}>

@@ -1,50 +1,65 @@
-/* Base Tailwind directives for shared UI package */
-@import "tailwindcss";
+/**
+ * Global Styles - Truss Suite UI Package
+ *
+ * This is the main entry point for all theme-related CSS in the Truss monorepo.
+ * Apps should NOT import tailwindcss here - only import theme variables.
+ *
+ * Architecture:
+ * 1. Import base theme (neutral shadcn/ui tokens)
+ * 2. Import brand-specific themes (Precision/Momentum overrides)
+ * 3. Define shared sidebar variables
+ * 4. Define dark mode custom variant
+ *
+ * Usage in apps:
+ * @import "@truss/ui/styles/globals.css";
+ *
+ * @see packages/ui/src/styles/theme.css - Base theme
+ * @see packages/ui/src/styles/themes/precision.css - Precision brand
+ * @see packages/ui/src/styles/themes/momentum.css - Momentum brand
+ */
 
-/* Import the theme configuration */
+/* Import base theme configuration (OKLCH color tokens) */
 @import "./theme.css";
-@import "tw-animate-css";
 
+/* Import app-specific brand themes */
+@import "./themes/precision.css";
+@import "./themes/momentum.css";
+
+/**
+ * Custom Dark Mode Variant
+ *
+ * Enables dark mode scoping with proper selector specificity.
+ * Matches any element with .dark class or within a .dark parent.
+ */
 @custom-variant dark (&:is(.dark *));
 
+/**
+ * Shared Sidebar Variables
+ *
+ * Common sidebar styling shared across all applications.
+ * Can be overridden by app-specific themes via data-app attribute.
+ *
+ * Light Mode: Clean, bright sidebar with subtle borders
+ * Dark Mode: High contrast sidebar optimized for low-light
+ */
 :root {
-  --sidebar: hsl(0 0% 98%);
-  --sidebar-foreground: hsl(240 5.3% 26.1%);
-  --sidebar-primary: hsl(240 5.9% 10%);
-  --sidebar-primary-foreground: hsl(0 0% 98%);
-  --sidebar-accent: hsl(240 4.8% 95.9%);
-  --sidebar-accent-foreground: hsl(240 5.9% 10%);
-  --sidebar-border: hsl(220 13% 91%);
-  --sidebar-ring: hsl(217.2 91.2% 59.8%);
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.37 0.012 285.8);
+  --sidebar-primary: oklch(0.21 0.006 285.88);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.968 0.001 286.37);
+  --sidebar-accent-foreground: oklch(0.21 0.006 285.88);
+  --sidebar-border: oklch(0.928 0.006 264.53);
+  --sidebar-ring: oklch(0.623 0.188 259.8);
 }
 
 .dark {
-  --sidebar: hsl(240 5.9% 10%);
-  --sidebar-foreground: hsl(240 4.8% 95.9%);
-  --sidebar-primary: hsl(224.3 76.3% 48%);
-  --sidebar-primary-foreground: hsl(0 0% 100%);
-  --sidebar-accent: hsl(240 3.7% 15.9%);
-  --sidebar-accent-foreground: hsl(240 4.8% 95.9%);
-  --sidebar-border: hsl(240 3.7% 15.9%);
-  --sidebar-ring: hsl(217.2 91.2% 59.8%);
-}
-
-@theme inline {
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
-}
-
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
+  --sidebar: oklch(0.21 0.006 285.88);
+  --sidebar-foreground: oklch(0.968 0.001 286.37);
+  --sidebar-primary: oklch(0.488 0.217 264.39);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.274 0.005 286.03);
+  --sidebar-accent-foreground: oklch(0.968 0.001 286.37);
+  --sidebar-border: oklch(0.274 0.005 286.03);
+  --sidebar-ring: oklch(0.623 0.188 259.8);
 }

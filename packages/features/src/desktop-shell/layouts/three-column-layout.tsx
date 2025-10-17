@@ -16,6 +16,8 @@ import {
 import { ScrollArea } from "@truss/ui/components/scroll-area";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@truss/ui/components/sidebar";
 import { cn } from "@truss/ui/lib/utils";
+import { AppBar } from "../components/app-bar";
+import type { BreadcrumbSegment } from "../components/app-bar";
 import { AppSidebar } from "../components/app-sidebar";
 import { useShell } from "../providers/shell-provider";
 import { useLayoutStore } from "../hooks/use-layout-store";
@@ -26,6 +28,8 @@ interface ThreeColumnLayoutProps {
   children: React.ReactNode;
   showMasterList?: boolean;
   masterListContent?: React.ReactNode;
+  breadcrumbs?: BreadcrumbSegment[];
+  actions?: React.ReactNode;
   onLogout?: () => void | Promise<void>;
 }
 
@@ -37,6 +41,8 @@ export function ThreeColumnLayout({
   children,
   showMasterList = false,
   masterListContent,
+  breadcrumbs,
+  actions,
   onLogout,
 }: ThreeColumnLayoutProps) {
   const { sidebarCollapsed } = useShell();
@@ -63,16 +69,21 @@ export function ThreeColumnLayout({
         <AppSidebar config={config} onLogout={onLogout} />
 
         {/* Main content area */}
-        <SidebarInset className="flex-1">
-          {/* Sidebar toggle button */}
-          <div className="flex h-12 items-center border-b px-4">
-            <SidebarTrigger className="-ml-1" />
+        <SidebarInset className="flex-1 flex flex-col">
+          {/* Top App Bar with breadcrumb navigation */}
+          <div className="flex items-center border-b h-12">
+            <div className="px-4">
+              <SidebarTrigger className="-ml-1" />
+            </div>
+            <div className="flex-1">
+              <AppBar breadcrumbs={breadcrumbs} actions={actions} className="border-0" />
+            </div>
           </div>
 
           <ResizablePanelGroup
             direction="horizontal"
             onLayout={handlePanelResize}
-            className="h-[calc(100%-3rem)] w-full"
+            className="flex-1 w-full"
           >
             {/* Master List Panel (optional) */}
             {showMasterList && masterListContent && (
@@ -88,11 +99,21 @@ export function ThreeColumnLayout({
 
                 <ResizableHandle
                   className={cn(
-                    "w-[1px] bg-border",
-                    "hover:bg-primary/20 active:bg-primary/30",
-                    "transition-colors duration-150"
+                    "w-1 bg-border group relative",
+                    "hover:bg-primary/30 active:bg-primary/50",
+                    "transition-all duration-150 ease-out",
+                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                   )}
-                />
+                >
+                  {/* Visual affordance indicator */}
+                  <div className="absolute inset-y-0 left-0 w-1 bg-gradient-to-r from-transparent via-primary/0 to-transparent group-hover:via-primary/20 transition-all duration-150" />
+                  {/* Grab handle dots */}
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="w-1 h-1 rounded-full bg-muted-foreground/50" />
+                    <div className="w-1 h-1 rounded-full bg-muted-foreground/50" />
+                    <div className="w-1 h-1 rounded-full bg-muted-foreground/50" />
+                  </div>
+                </ResizableHandle>
               </>
             )}
 

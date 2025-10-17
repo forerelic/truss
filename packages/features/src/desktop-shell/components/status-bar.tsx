@@ -58,8 +58,8 @@ export function StatusBar() {
   }, []);
 
   return (
-    <TooltipProvider>
-      <div className="status-bar h-6 border-t bg-background px-2 flex items-center justify-between text-xs text-muted-foreground">
+    <TooltipProvider delayDuration={200}>
+      <div className="status-bar h-6 border-t bg-background/95 backdrop-blur-sm px-2 flex items-center justify-between text-xs text-muted-foreground transition-all duration-150">
         {/* Left Section */}
         <div className="flex items-center gap-2">
           {/* Connection Status */}
@@ -68,14 +68,16 @@ export function StatusBar() {
           <Separator orientation="vertical" className="h-3" />
 
           {/* Workspace Info */}
-          <div className="flex items-center gap-1">
-            <span className="font-medium">{workspace?.organization_name || "Personal"}</span>
+          <button className="flex items-center gap-1 px-1.5 py-0.5 rounded-sm hover:bg-accent/50 active:bg-accent transition-all duration-150 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring">
+            <span className="font-medium text-[10px]">
+              {workspace?.organization_name || "Personal"}
+            </span>
             {workspace?.role && (
-              <Badge variant="secondary" className="h-4 px-1 text-[10px]">
+              <Badge variant="secondary" className="h-4 px-1.5 text-[10px] transition-all">
                 {workspace.role}
               </Badge>
             )}
-          </div>
+          </button>
 
           <Separator orientation="vertical" className="h-3" />
 
@@ -102,7 +104,7 @@ export function StatusBar() {
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-5 px-1 hover:bg-accent/50"
+                className="h-5 px-2 hover:bg-accent/50 active:bg-accent transition-all duration-150 focus-visible:ring-1 focus-visible:ring-ring"
                 onClick={() => {
                   // Trigger command palette
                   const event = new KeyboardEvent("keydown", {
@@ -113,11 +115,11 @@ export function StatusBar() {
                   document.dispatchEvent(event);
                 }}
               >
-                <Command className="h-3 w-3 mr-1" />
-                <span>⌘K</span>
+                <Command className="h-3 w-3 mr-1 transition-transform hover:scale-110" />
+                <span className="text-[10px] font-medium">⌘K</span>
               </Button>
             </TooltipTrigger>
-            <TooltipContent side="top">
+            <TooltipContent side="top" className="text-xs">
               <p>Open Command Palette</p>
             </TooltipContent>
           </Tooltip>
@@ -135,29 +137,38 @@ export function StatusBar() {
 }
 
 /**
- * Connection status indicator
+ * Connection status indicator with enhanced hover states
  */
 function ConnectionIndicator({ status }: { status: ConnectionStatus }) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <div
+        <button
           className={cn(
-            "flex items-center gap-1",
+            "flex items-center gap-1 px-1.5 py-0.5 rounded-sm",
+            "transition-all duration-150",
+            "hover:bg-accent/50 active:bg-accent",
+            "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
             status === "connected" && "text-green-600 dark:text-green-400",
             status === "connecting" && "text-yellow-600 dark:text-yellow-400",
             status === "disconnected" && "text-red-600 dark:text-red-400",
             status === "error" && "text-destructive"
           )}
         >
-          {status === "connected" && <Wifi className="h-3 w-3" />}
+          {status === "connected" && (
+            <Wifi className="h-3 w-3 transition-transform hover:scale-110" />
+          )}
           {status === "connecting" && <Loader2 className="h-3 w-3 animate-spin" />}
-          {status === "disconnected" && <WifiOff className="h-3 w-3" />}
-          {status === "error" && <AlertCircle className="h-3 w-3" />}
-          <span className="capitalize">{status}</span>
-        </div>
+          {status === "disconnected" && (
+            <WifiOff className="h-3 w-3 transition-transform hover:scale-110" />
+          )}
+          {status === "error" && (
+            <AlertCircle className="h-3 w-3 transition-transform hover:scale-110" />
+          )}
+          <span className="capitalize text-[10px] font-medium">{status}</span>
+        </button>
       </TooltipTrigger>
-      <TooltipContent side="top">
+      <TooltipContent side="top" className="text-xs">
         <p>Connection: {status}</p>
       </TooltipContent>
     </Tooltip>
@@ -165,7 +176,7 @@ function ConnectionIndicator({ status }: { status: ConnectionStatus }) {
 }
 
 /**
- * Sync status indicator
+ * Sync status indicator with enhanced hover states
  */
 function SyncIndicator({ status }: { status: SyncStatus }) {
   const lastSync = status.lastSyncedAt
@@ -178,30 +189,37 @@ function SyncIndicator({ status }: { status: SyncStatus }) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <div
+        <button
           className={cn(
-            "flex items-center gap-1",
-            status.state === "idle" && "text-muted-foreground",
+            "flex items-center gap-1 px-1.5 py-0.5 rounded-sm",
+            "transition-all duration-150",
+            "hover:bg-accent/50 active:bg-accent",
+            "focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+            status.state === "idle" && "text-muted-foreground hover:text-foreground",
             status.state === "syncing" && "text-blue-600 dark:text-blue-400",
             status.state === "error" && "text-destructive"
           )}
         >
-          {status.state === "idle" && <Cloud className="h-3 w-3" />}
+          {status.state === "idle" && (
+            <Cloud className="h-3 w-3 transition-transform hover:scale-110" />
+          )}
           {status.state === "syncing" && <Loader2 className="h-3 w-3 animate-spin" />}
-          {status.state === "error" && <CloudOff className="h-3 w-3" />}
-          <span>Sync</span>
+          {status.state === "error" && (
+            <CloudOff className="h-3 w-3 transition-transform hover:scale-110" />
+          )}
+          <span className="text-[10px] font-medium">Sync</span>
           {status.pendingCount && status.pendingCount > 0 && (
-            <Badge variant="secondary" className="h-3 px-1 text-[10px]">
+            <Badge variant="secondary" className="h-4 px-1.5 text-[10px] ml-1 transition-all">
               {status.pendingCount}
             </Badge>
           )}
-        </div>
+        </button>
       </TooltipTrigger>
-      <TooltipContent side="top">
+      <TooltipContent side="top" className="text-xs">
         <div className="space-y-1">
-          <p>Sync: {status.state}</p>
-          <p className="text-xs text-muted-foreground">Last: {lastSync}</p>
-          {status.error && <p className="text-xs text-destructive">{status.error}</p>}
+          <p className="font-medium">Sync: {status.state}</p>
+          <p className="text-muted-foreground">Last: {lastSync}</p>
+          {status.error && <p className="text-destructive">{status.error}</p>}
         </div>
       </TooltipContent>
     </Tooltip>
