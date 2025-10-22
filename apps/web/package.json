@@ -28,13 +28,13 @@
     "zod": "^4.1.12"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.1.14",
+    "@tailwindcss/postcss": "^4.1.15",
     "@truss/eslint-config": "*",
     "@truss/typescript-config": "workspace:*",
-    "@types/node": "^22.15.3",
+    "@types/node": "^24.9.1",
     "@types/react": "19.2.2",
     "@types/react-dom": "19.2.2",
-    "eslint": "^9.34.0",
+    "eslint": "^9.38.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.4",
     "postcss": "^8.5.6",
