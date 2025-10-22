@@ -29,7 +29,7 @@
     "@types/node": "^22.15.3",
     "@types/pg": "^8.15.5",
     "@types/react": "19.2.2",
-    "eslint": "^9.34.0",
+    "eslint": "^9.38.0",
     "typescript": "5.9.3"
   }
 }
