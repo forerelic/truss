@@ -114,7 +114,7 @@ export function UserMenu({ onLogout }: UserMenuProps = {}) {
                 <CreditCard className="mr-2 h-4 w-4" />
                 Billing
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => (window.location.href = "/settings")}>
                 <Settings className="mr-2 h-4 w-4" />
                 Settings
                 <DropdownMenuShortcut>⌘,</DropdownMenuShortcut>

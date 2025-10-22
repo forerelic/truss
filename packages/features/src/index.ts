@@ -20,3 +20,6 @@ export * from "./auth";
 
 // Export desktop-shell feature
 export * from "./desktop-shell";
+
+// Export settings feature
+export * from "./settings";

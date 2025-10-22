@@ -1,10 +1,11 @@
 import { useBetterAuthTauri } from "@daveyplate/better-auth-tauri/react";
 import { tauriAuthClient, useSession, signOut } from "./lib/auth-client";
 import { WorkspaceProvider } from "@truss/features/organizations/workspace-context";
-import { AppShell, AuthScreen } from "@truss/features";
+import { AppShell, AuthScreen, SettingsPage } from "@truss/features";
 import { Card, CardContent, CardHeader, CardTitle } from "@truss/ui/components/card";
 import { Button } from "@truss/ui/components/button";
 import { precisionShellConfig } from "./config/shell-config";
+import { useState, useEffect } from "react";
 
 function App() {
   // Handle OAuth deep links for Tauri
@@ -26,6 +27,16 @@ function App() {
 
 function PrecisionApp() {
   const { data: session, isPending } = useSession();
+  const [currentPath, setCurrentPath] = useState(window.location.pathname);
+
+  useEffect(() => {
+    const handleLocationChange = () => {
+      setCurrentPath(window.location.pathname);
+    };
+
+    window.addEventListener("popstate", handleLocationChange);
+    return () => window.removeEventListener("popstate", handleLocationChange);
+  }, []);
 
   const handleLogout = async () => {
     await signOut({
@@ -64,13 +75,20 @@ function PrecisionApp() {
     );
   }
 
+  const renderContent = () => {
+    if (currentPath === "/settings") {
+      return <SettingsPage />;
+    }
+    return <DashboardView user={session.user} />;
+  };
+
   return (
     <AppShell
       config={precisionShellConfig}
       onCommandExecute={(commandId) => {}}
       onLogout={handleLogout}
     >
-      <DashboardView user={session.user} />
+      {renderContent()}
     </AppShell>
   );
 }
