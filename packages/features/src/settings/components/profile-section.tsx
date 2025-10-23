@@ -19,7 +19,7 @@ import { Input } from "@truss/ui/components/input";
 import { Label } from "@truss/ui/components/label";
 import { Separator } from "@truss/ui/components/separator";
 import { Loader2 } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@truss/ui/components/sonner";
 
 /**
  * Profile section for editing user information
@@ -69,8 +69,9 @@ export function ProfileSection() {
   };
 
   const handleAvatarUpload = async (file: File) => {
-    // TODO: Implement avatar upload
+    // TODO: Implement avatar upload using the file parameter
     // For now, just simulate upload
+    console.log("Avatar upload simulated for:", file.name);
     await new Promise((resolve) => setTimeout(resolve, 1500));
     toast.success("Avatar uploaded successfully");
   };

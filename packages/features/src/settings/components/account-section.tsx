@@ -15,7 +15,6 @@ import {
 import { Button } from "@truss/ui/components/button";
 import { Input } from "@truss/ui/components/input";
 import { Label } from "@truss/ui/components/label";
-import { Separator } from "@truss/ui/components/separator";
 import {
   Dialog,
   DialogContent,
@@ -26,7 +25,7 @@ import {
   DialogTrigger,
 } from "@truss/ui/components/dialog";
 import { Loader2, AlertTriangle } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@truss/ui/components/sonner";
 
 /**
  * Account section for password change and account deletion

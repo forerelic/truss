@@ -24,7 +24,7 @@ import {
 import { Separator } from "@truss/ui/components/separator";
 import { Moon, Sun, Monitor, Keyboard } from "lucide-react";
 import { cn } from "@truss/ui/lib/utils";
-import { toast } from "sonner";
+import { toast } from "@truss/ui/components/sonner";
 
 type ThemeMode = "light" | "dark" | "system";
 
