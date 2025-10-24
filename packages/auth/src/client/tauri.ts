@@ -1,3 +1,7 @@
+/**
+ * Authentication client for Tauri desktop applications.
+ */
+
 "use client";
 
 import { createAuthClient } from "better-auth/react";
@@ -10,26 +14,31 @@ import {
 import type { auth } from "../server";
 
 /**
- * Authentication client for Tauri desktop applications with deep link OAuth support.
- * Sessions persist via cookies through the Tauri HTTP Plugin.
+ * Get the base URL for the authentication server.
  */
 const getBaseUrl = () => {
-  if (typeof import.meta !== "undefined") {
-    const meta = import.meta as { env?: Record<string, string> };
-    if (meta.env?.VITE_BETTER_AUTH_URL) {
-      return meta.env.VITE_BETTER_AUTH_URL;
+  if (typeof import.meta !== "undefined" && import.meta.env) {
+    if (import.meta.env.VITE_BETTER_AUTH_URL) {
+      return import.meta.env.VITE_BETTER_AUTH_URL;
     }
-
-    if (meta.env?.DEV) {
+    if (import.meta.env.DEV === true || import.meta.env.MODE === "development") {
       return "http://localhost:3000";
     }
   }
-
-  throw new Error("VITE_BETTER_AUTH_URL environment variable is required for production");
+  // Default to localhost for development/testing
+  return "http://localhost:3000";
 };
 
+/**
+ * Authentication client configured for Tauri desktop applications.
+ * Handles token-based auth in production and cookie-based auth in development.
+ */
 export const tauriAuthClient = createAuthClient({
   baseURL: getBaseUrl(),
+
+  fetchOptions: {
+    credentials: "include",
+  },
 
   plugins: [
     inferAdditionalFields<typeof auth>(),
@@ -43,5 +52,10 @@ export const tauriAuthClient = createAuthClient({
   ],
 });
 
+/**
+ * Export authentication methods for use in components.
+ */
 export const { useSession, signIn, signOut, signUp, useActiveOrganization, useListOrganizations } =
   tauriAuthClient;
+
+export { tauriAuthClient as authClient };

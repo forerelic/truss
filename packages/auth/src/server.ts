@@ -5,8 +5,6 @@ import { tauri } from "@daveyplate/better-auth-tauri/plugin";
 
 /**
  * Authentication server configuration using Better Auth.
- * Provides email/password auth, social providers, two-factor authentication,
- * admin roles, and organization management.
  */
 const getDatabaseUrl = () => {
   if (typeof process !== "undefined") {
@@ -37,6 +35,16 @@ export const auth = betterAuth({
 
   baseURL: getBaseUrl(),
 
+  trustedOrigins: [
+    "truss://",
+    "tauri://localhost",
+    "https://tauri.localhost",
+    "http://localhost:1420",
+    "http://localhost:1421",
+    "http://localhost:3000",
+    getBaseUrl(),
+  ],
+
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: false,
@@ -57,11 +65,11 @@ export const auth = betterAuth({
   },
 
   session: {
-    expiresIn: 60 * 60 * 24 * 7,
-    updateAge: 60 * 60 * 24,
+    expiresIn: 60 * 60 * 24 * 7, // 7 days
+    updateAge: 60 * 60 * 24, // 1 day
     cookieCache: {
       enabled: true,
-      maxAge: 5 * 60,
+      maxAge: 5 * 60, // 5 minutes
     },
   },
 
@@ -70,7 +78,6 @@ export const auth = betterAuth({
       enabled: false,
     },
     useSecureCookies: process.env.NODE_ENV === "production",
-    generateId: false,
   },
 
   user: {
@@ -121,7 +128,7 @@ export const auth = betterAuth({
       },
 
       sendInvitationEmail: async (data) => {
-        // TODO: Implement email provider integration
+        // Pending email provider integration
         console.log("Send invitation email:", data);
       },
 
@@ -130,9 +137,9 @@ export const auth = betterAuth({
 
     tauri({
       scheme: "truss",
-      callbackURL: "/",
+      callbackURL: "/dashboard",
       successText: "Authentication successful! You can close this window.",
-      debugLogs: process.env.NODE_ENV === "development",
+      debugLogs: false,
     }),
   ],
 });

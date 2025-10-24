@@ -1,9 +1,10 @@
 @import "tailwindcss";
 
-/* Make Tailwind scan shared UI code, v4-style */
+/* Scan both UI and Features packages for Tailwind classes */
 @source "../../../packages/ui/src/**/*.{ts,tsx}";
+@source "../../../packages/features/src/**/*.{ts,tsx}";
 
-/* Shared tokens/utilities */
+/* Import theme tokens and CSS variables */
 @import "@truss/ui/styles/theme.css";
 
 :root {

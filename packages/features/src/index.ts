@@ -14,3 +14,12 @@
 
 // Export organizations feature
 export * from "./organizations";
+
+// Export auth feature
+export * from "./auth";
+
+// Export desktop-shell feature
+export * from "./desktop-shell";
+
+// Export settings feature
+export * from "./settings";
