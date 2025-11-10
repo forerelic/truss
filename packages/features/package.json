@@ -37,11 +37,11 @@
     "@tanstack/react-virtual": "^3.10.8",
     "@truss/eslint-config": "*",
     "@truss/typescript-config": "*",
-    "@types/node": "^24.9.1",
+    "@types/node": "^24.10.0",
     "@types/react": "19.2.2",
-    "eslint": "^9.38.0",
+    "eslint": "^9.39.1",
     "typescript": "5.9.3",
-    "vite": "^7.1.10",
+    "vite": "^7.2.2",
     "zustand": "^5.0.2"
   }
 }
