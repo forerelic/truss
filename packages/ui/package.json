@@ -47,13 +47,13 @@
   "devDependencies": {
     "@truss/eslint-config": "*",
     "@truss/typescript-config": "*",
-    "@types/node": "^24.9.1",
+    "@types/node": "^24.10.1",
     "@types/react": "19.2.2",
     "@types/react-dom": "19.2.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "eslint": "^9.38.0",
-    "tailwind-merge": "^3.3.1",
+    "eslint": "^9.39.1",
+    "tailwind-merge": "^3.4.0",
     "typescript": "5.9.3"
   },
   "dependencies": {
